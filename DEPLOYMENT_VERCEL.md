@@ -1,70 +1,87 @@
-# Unified Vercel Deployment (Current Working Setup)
+# Unified Vercel Deployment Runbook (Step-by-Step)
 
-This monorepo must be deployed as 7 separate Vercel projects.
+Use this as the single source of truth. Follow in order.
 
-## 1. Create These 7 Vercel Projects
+## 0. Recovery First (Recommended Right Now)
 
-1. `web` -> `apps/web`
-2. `gateway` -> `apps/gateway`
-3. `auth-service` -> `apps/auth-service`
-4. `user-service` -> `apps/user-service`
-5. `productivity-service` -> `apps/productivity-service`
-6. `messaging-service` -> `apps/messaging-service`
-7. `file-service` -> `apps/file-service`
+If deployments are currently broken, do this once:
 
-## 2. Critical Vercel UI Settings (Do This First)
+1. In each Vercel project, open `Settings -> Build and Development Settings`.
+2. Remove any `Production Override` values.
+3. Re-save all settings from this document.
+4. Redeploy each project (do not rely on old deployments).
 
-For each project:
+## 1. Projects and Root Directories
 
-1. Remove any **Production Overrides** from old deployments.
-2. Set **Root Directory** to that app folder (for example `apps/auth-service`).
-3. Enable **Include files outside the root directory in the Build Step**.
-4. Use **pnpm**.
+Create/use these 7 Vercel projects from the same repo:
 
-Framework preset:
+1. `web` -> Root Directory: `apps/web`
+2. `gateway` -> Root Directory: `apps/gateway`
+3. `auth-service` -> Root Directory: `apps/auth-service`
+4. `user-service` -> Root Directory: `apps/user-service`
+5. `productivity-service` -> Root Directory: `apps/productivity-service`
+6. `messaging-service` -> Root Directory: `apps/messaging-service`
+7. `file-service` -> Root Directory: `apps/file-service`
+
+For all 7 projects, enable:
+
+1. `Include files outside the root directory in the Build Step`
+
+## 2. Framework Preset (Very Important)
 
 1. `web`: `Next.js`
-2. all backend services (`gateway/auth/user/productivity/messaging/file`): `Other`
+2. `gateway`: `Other`
+3. `auth-service`: `Other`
+4. `user-service`: `Other`
+5. `productivity-service`: `Other`
+6. `messaging-service`: `Other`
+7. `file-service`: `Other`
 
-Do not use `Express` framework preset for backend projects.
+Do not use `Express` preset for backend projects.
 
 ## 3. Install and Build Commands
 
-Use these exact commands.
+### Temporary install command (until lockfile is regenerated and committed)
 
-Install command (temporary while lockfile is being stabilized):
+Use this in all 7 projects:
 
-`pnpm install`
+`pnpm install --no-frozen-lockfile`
 
-After lockfile is clean and committed, switch install command to:
+### Final install command (after lockfile is clean)
 
 `pnpm install --frozen-lockfile`
 
-Build commands:
+### Build commands per project
 
-1. `web`:
+1. `web`
 `pnpm -w --filter @unified/web build`
-2. `gateway`:
+
+2. `gateway`
 `pnpm -w --filter @unified/shared build && pnpm -w --filter @unified/gateway build`
-3. `auth-service`:
+
+3. `auth-service`
 `pnpm -w --filter @unified/shared build && pnpm -w --filter @unified/auth-service build`
-4. `user-service`:
+
+4. `user-service`
 `pnpm -w --filter @unified/shared build && pnpm -w --filter @unified/user-service build`
-5. `productivity-service`:
+
+5. `productivity-service`
 `pnpm -w --filter @unified/shared build && pnpm -w --filter @unified/productivity-service build`
-6. `messaging-service`:
+
+6. `messaging-service`
 `pnpm -w --filter @unified/shared build && pnpm -w --filter @unified/messaging-service build`
-7. `file-service`:
+
+7. `file-service`
 `pnpm -w --filter @unified/shared build && pnpm -w --filter @unified/file-service build`
 
-Output directory:
+### Output Directory
 
 1. `web`: `.next`
-2. backend services: leave empty
+2. backend projects: empty
 
-## 4. Required Environment Variables
+## 4. Environment Variables
 
-Set in Vercel project settings, not only local `.env`.
+Set all of these in Vercel project settings (Production + Preview as needed).
 
 ### web
 
@@ -87,50 +104,103 @@ Set in Vercel project settings, not only local `.env`.
 3. `CLIENT_ORIGIN=https://<web-project>.vercel.app`
 4. `JWT_ACCESS_SECRET=<strong-secret>`
 5. `JWT_REFRESH_SECRET=<strong-secret>`
-6. all other auth envs required by `apps/auth-service/.env`
+6. all additional auth envs from `apps/auth-service/.env`
 
-### user-service, productivity-service, messaging-service, file-service
+### user-service
 
 1. `NODE_ENV=production`
 2. `MONGODB_URI=<remote-atlas-uri>`
 3. `CLIENT_ORIGIN=https://<web-project>.vercel.app`
 4. `JWT_ACCESS_SECRET=<same-as-auth>`
 5. `JWT_REFRESH_SECRET=<same-as-auth>`
-6. each service-specific env from its local `.env`
+6. any extra env from `apps/user-service/.env`
 
-### file-service provider variables
+### productivity-service
 
-Set one provider completely:
+1. `NODE_ENV=production`
+2. `MONGODB_URI=<remote-atlas-uri>`
+3. `CLIENT_ORIGIN=https://<web-project>.vercel.app`
+4. `JWT_ACCESS_SECRET=<same-as-auth>`
+5. `JWT_REFRESH_SECRET=<same-as-auth>`
+6. any extra env from `apps/productivity-service/.env`
 
-1. ImageKit:
+### messaging-service
+
+1. `NODE_ENV=production`
+2. `MONGODB_URI=<remote-atlas-uri>`
+3. `CLIENT_ORIGIN=https://<web-project>.vercel.app`
+4. `JWT_ACCESS_SECRET=<same-as-auth>`
+5. `JWT_REFRESH_SECRET=<same-as-auth>`
+6. any extra env from `apps/messaging-service/.env`
+
+### file-service
+
+1. `NODE_ENV=production`
+2. `MONGODB_URI=<remote-atlas-uri>`
+3. `CLIENT_ORIGIN=https://<web-project>.vercel.app`
+4. `JWT_ACCESS_SECRET=<same-as-auth>`
+5. `JWT_REFRESH_SECRET=<same-as-auth>`
+6. any extra env from `apps/file-service/.env`
+7. provider envs for one full provider set:
 `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`
-2. Cloudinary:
+or
 `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
 
-## 5. Deploy Order
+## 5. Deploy Sequence
 
-1. Deploy backend services first:
-`auth-service`, `user-service`, `productivity-service`, `messaging-service`, `file-service`
-2. Deploy `gateway` with final backend URLs
-3. Deploy `web` with final gateway URL
+Deploy in this exact order:
 
-## 6. Validation Checklist
+1. `auth-service`
+2. `user-service`
+3. `productivity-service`
+4. `messaging-service`
+5. `file-service`
+6. `gateway` (after setting backend URLs from steps 1-5)
+7. `web` (after setting `NEXT_PUBLIC_API_BASE` to gateway URL)
 
-1. `https://<auth>/health`
-2. `https://<user>/health`
-3. `https://<productivity>/health`
-4. `https://<messaging>/health`
-5. `https://<file>/health`
-6. `https://<gateway>/health`
-7. Register/login from web
+## 6. Validation Steps
 
-## 7. If Build/Runtime Fails
+After deployments:
 
-1. If Vercel says `No entrypoint found`:
-backend project is wrongly set to `Express` preset. Change to `Other`.
-2. If `Cannot find module '@unified/shared'`:
-root directory/build settings are wrong or old production override is still active.
-3. If `FUNCTION_INVOCATION_FAILED`:
-check missing env vars (`MONGODB_URI`, `CLIENT_ORIGIN`, JWT secrets, gateway service URLs).
-4. If web build compiles backend apps:
-web project still has wrong build command/override. It should only run `pnpm -w --filter @unified/web build`.
+1. Open `https://<auth-service>/health`
+2. Open `https://<user-service>/health`
+3. Open `https://<productivity-service>/health`
+4. Open `https://<messaging-service>/health`
+5. Open `https://<file-service>/health`
+6. Open `https://<gateway>/health`
+7. Test register/login from web
+8. Test one call per module through gateway
+
+## 7. Lockfile Stabilization (Mandatory)
+
+When local machine is ready:
+
+1. Run `pnpm install`
+2. Commit `pnpm-lock.yaml`
+3. Push
+4. Change install command in all projects from `--no-frozen-lockfile` to `--frozen-lockfile`
+5. Redeploy all projects
+
+## 8. Error -> Fix Mapping
+
+1. `ERR_PNPM_OUTDATED_LOCKFILE`
+Set install command to `pnpm install --no-frozen-lockfile` temporarily.
+
+2. `Cannot find module '@unified/shared'`
+Root directory or include-outside-root setting is wrong, or stale project override is active.
+
+3. `No entrypoint found`
+Backend project framework preset is wrong (must be `Other`).
+
+4. `FUNCTION_INVOCATION_FAILED`
+Service boot failed due to missing env variables or invalid production values.
+
+5. Web build trying to compile backend apps
+Web build command is wrong or overridden; must be only:
+`pnpm -w --filter @unified/web build`
+
+## 9. Notes
+
+1. Keep Node.js version consistent across all projects.
+2. Do not copy local `.env` files directly; set values in each Vercel project.
+3. Re-deploy after every settings change; old deployment behavior does not auto-fix.
