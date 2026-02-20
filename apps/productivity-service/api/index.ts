@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { app } from '../src/app';
 import { env } from '../src/config/env';
 
@@ -12,9 +11,7 @@ const ensureMongo = async () => {
     return;
   }
   if (!mongoConnectionPromise) {
-    mongoConnectionPromise = mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 10000,
-    });
+    mongoConnectionPromise = mongoose.connect(mongoUri);
   }
   await mongoConnectionPromise;
 };
@@ -26,14 +23,15 @@ export const config = {
   },
 };
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: unknown, res: unknown) {
   try {
     await ensureMongo();
     return appHandler?.(req as never, res as never);
   } catch (error) {
     console.error('[productivity-service] serverless bootstrap failed', error);
-    if (!res.headersSent) {
-      res.status(500).json({
+    const typedRes = res as { headersSent?: boolean; status: (code: number) => { json: (body: unknown) => void } };
+    if (!typedRes.headersSent) {
+      typedRes.status(500).json({
         success: false,
         error: {
           message: error instanceof Error ? error.message : 'Server bootstrap failed',

@@ -21,15 +21,8 @@ Each backend app already includes:
 
 ## 2. Build/Install Settings (for each project)
 
-- Install Command: `pnpm install`
-- Root Directory:
-  - Web: `apps/web`
-  - Gateway: `apps/gateway`
-  - Auth: `apps/auth-service`
-  - User: `apps/user-service`
-  - Productivity: `apps/productivity-service`
-  - Messaging: `apps/messaging-service`
-  - File: `apps/file-service`
+- Install Command: `pnpm install --frozen-lockfile`
+- Root Directory (all projects): repo root (`.`)
 - Build Command:
   - Web: `pnpm --filter @unified/web build`
   - Gateway: `pnpm --filter @unified/shared build && pnpm --filter @unified/gateway build`
@@ -38,6 +31,9 @@ Each backend app already includes:
   - Productivity: `pnpm --filter @unified/shared build && pnpm --filter @unified/productivity-service build`
   - Messaging: `pnpm --filter @unified/shared build && pnpm --filter @unified/messaging-service build`
   - File: `pnpm --filter @unified/shared build && pnpm --filter @unified/file-service build`
+- Output Directory:
+  - Web: `.next`
+  - Backends: leave empty (Vercel serverless function from `api/index.ts`)
 
 ## 3. Environment Variables
 
