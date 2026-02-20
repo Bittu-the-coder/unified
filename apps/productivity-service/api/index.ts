@@ -1,16 +1,13 @@
 import mongoose from 'mongoose';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { app } from '../src/app';
+import { env } from '../src/config/env';
 
 let mongoConnectionPromise: Promise<typeof mongoose> | null = null;
-let appHandler: ((req: unknown, res: unknown) => unknown) | null = null;
-let mongoUri: string | null = null;
+const appHandler = app as unknown as (req: unknown, res: unknown) => unknown;
+const mongoUri = env.MONGODB_URI;
 
 const ensureMongo = async () => {
-  if (!appHandler || !mongoUri) {
-    const [{ app }, { env }] = await Promise.all([import('../src/app'), import('../src/config/env')]);
-    appHandler = app as unknown as (req: unknown, res: unknown) => unknown;
-    mongoUri = env.MONGODB_URI;
-  }
   if (mongoose.connection.readyState === 1) {
     return;
   }
