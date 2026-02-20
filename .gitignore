@@ -1,0 +1,9 @@
+node_modules
+dist
+.next
+.env
+.env.local
+coverage
+tmp_docx_extract
+plan_clean.txt
+plan_lines.txt

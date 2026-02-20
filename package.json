@@ -1,0 +1,25 @@
+{
+  "name": "unified",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run -ws build",
+    "dev": "npm run dev -w apps/gateway",
+    "dev:all": "pnpm --parallel --filter @unified/auth-service --filter @unified/user-service --filter @unified/productivity-service --filter @unified/messaging-service --filter @unified/gateway --filter @unified/web dev",
+    "build:all": "pnpm --filter @unified/shared build && pnpm --recursive --filter \"@unified/*\" build",
+    "typecheck:all": "pnpm --recursive --filter \"@unified/*\" typecheck",
+    "lint": "npm run -ws lint",
+    "typecheck": "npm run -ws typecheck",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "eslint": "^9.20.1",
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
+  }
+}

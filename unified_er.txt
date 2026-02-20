@@ -1,0 +1,1285 @@
+// ======================================================
+// UNIFIED PROJECT - COMPLETE DATABASE SCHEMA
+// Scalable MongoDB-Compatible Design
+// ======================================================
+
+// ======================================================
+// CORE USER MANAGEMENT
+// ======================================================
+
+Table users {
+  id string [pk, note: 'UUID']
+  email string [unique, not null]
+  phone string [unique]
+  username string [unique, not null]
+  full_name varchar(200)
+  password_hash varchar(255) [not null, note: 'BCrypt hashed']
+  salt varchar(255) [not null]
+  avatar_url text
+  bio text
+  role varchar(50) [not null, default: 'user']
+  status varchar(50) [not null, default: 'active']
+  email_verified boolean [default: false]
+  phone_verified boolean [default: false]
+  two_factor_enabled boolean [default: false]
+  two_factor_secret varchar(255)
+  last_login timestamp
+  last_active timestamp
+  login_streak integer [default: 0]
+  preferences json [note: 'User preferences as JSON']
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+  deleted_at timestamp
+
+  indexes {
+    (email) [unique]
+    (phone) [unique]
+    (username) [unique]
+    (status)
+    (role, status)
+  }
+}
+
+Table sessions {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  refresh_token text [unique, not null]
+  access_token text
+  device_info json
+  ip_address varchar(50)
+  user_agent text
+  expires_at timestamp [not null]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id)
+    (refresh_token) [unique]
+    (expires_at)
+  }
+}
+
+Table user_devices {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  device_id varchar(255) [not null]
+  device_name varchar(255)
+  device_type varchar(50)
+  push_token text
+  last_active timestamp
+  is_trusted boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, device_id) [unique]
+    (user_id, last_active)
+  }
+}
+
+Table user_follows {
+  id string [pk, note: 'UUID']
+  follower_id string [not null]
+  following_id string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (follower_id, following_id) [unique]
+    (following_id, created_at)
+  }
+}
+
+Table user_blocks {
+  id string [pk, note: 'UUID']
+  blocker_id string [not null]
+  blocked_id string [not null]
+  reason text
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (blocker_id, blocked_id) [unique]
+  }
+}
+
+// ======================================================
+// FILE MANAGEMENT (ImageKit/Cloudinary)
+// ======================================================
+
+Table files {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(500) [not null]
+  original_name varchar(500) [not null]
+  description text
+  file_type varchar(100) [not null]
+  mime_type varchar(100)
+  size bigint [not null, note: 'In bytes']
+  storage_provider varchar(50) [not null]
+  storage_path text [not null]
+  public_url text [not null]
+  thumbnail_url text
+  hash varchar(255)
+  is_public boolean [default: false]
+  is_starred boolean [default: false]
+  download_count integer [default: 0]
+  version integer [default: 1]
+  parent_folder_id string
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+  deleted_at timestamp
+
+  indexes {
+    (user_id, parent_folder_id)
+    (user_id, is_starred)
+    (user_id, file_type)
+    (user_id, created_at)
+    (hash)
+  }
+}
+
+Table folders {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(500) [not null]
+  description text
+  parent_folder_id string
+  is_starred boolean [default: false]
+  is_public boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+  deleted_at timestamp
+
+  indexes {
+    (user_id, parent_folder_id)
+    (user_id, name, parent_folder_id) [unique]
+    (user_id, is_starred)
+  }
+}
+
+Table file_shares {
+  id string [pk, note: 'UUID']
+  file_id string
+  folder_id string
+  shared_by string [not null]
+  shared_with_user_id string
+  shared_with_email varchar(255)
+  permission varchar(50) [default: 'view']
+  share_token text [unique, not null]
+  expires_at timestamp
+  access_count integer [default: 0]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (share_token) [unique]
+    (shared_by)
+    (shared_with_user_id)
+    (file_id)
+    (folder_id)
+    (expires_at)
+  }
+}
+
+Table file_tags {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(100) [not null]
+  color varchar(20)
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, name) [unique]
+  }
+}
+
+Table file_tag_mappings {
+  id string [pk, note: 'UUID']
+  file_id string
+  folder_id string
+  tag_id string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (tag_id, file_id) [unique]
+    (tag_id, folder_id) [unique]
+    (file_id)
+    (folder_id)
+  }
+}
+
+// ======================================================
+// MESSAGING SYSTEM
+// ======================================================
+
+Table conversations {
+  id string [pk, note: 'UUID']
+  type varchar(50) [not null]
+  name varchar(500)
+  description text
+  avatar_url text
+  created_by string [not null]
+  is_archived boolean [default: false]
+  pinned_message_id string
+  last_message_at timestamp
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (created_by)
+    (last_message_at)
+    (type, last_message_at)
+  }
+}
+
+Table conversation_participants {
+  id string [pk, note: 'UUID']
+  conversation_id string [not null]
+  user_id string [not null]
+  role varchar(50) [default: 'member']
+  nickname varchar(255)
+  muted_until timestamp
+  last_read_message_id string
+  is_typing boolean [default: false]
+  joined_at timestamp [default: `now()`, not null]
+  left_at timestamp
+
+  indexes {
+    (conversation_id, user_id) [unique]
+    (user_id, last_read_message_id)
+    (conversation_id, joined_at)
+  }
+}
+
+Table messages {
+  id string [pk, note: 'UUID']
+  conversation_id string [not null]
+  sender_id string [not null]
+  message_type varchar(50) [default: 'text']
+  content text
+  metadata json
+  reply_to_id string
+  forwarded_from_id string
+  is_edited boolean [default: false]
+  is_deleted boolean [default: false]
+  is_pinned boolean [default: false]
+  delivery_status varchar(50) [default: 'sent']
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (conversation_id, created_at)
+    (sender_id, created_at)
+    (reply_to_id)
+    (conversation_id, is_pinned)
+  }
+}
+
+Table message_reactions {
+  id string [pk, note: 'UUID']
+  message_id string [not null]
+  user_id string [not null]
+  reaction varchar(50) [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (message_id, user_id, reaction) [unique]
+    (message_id, reaction)
+  }
+}
+
+Table message_read_receipts {
+  id string [pk, note: 'UUID']
+  message_id string [not null]
+  user_id string [not null]
+  read_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (message_id, user_id) [unique]
+    (user_id, read_at)
+  }
+}
+
+Table attachments {
+  id string [pk, note: 'UUID']
+  message_id string [not null]
+  file_id string [not null]
+  file_name varchar(500) [not null]
+  file_size bigint [not null]
+  file_type varchar(100) [not null]
+  file_url text [not null]
+  thumbnail_url text
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (message_id)
+    (file_id)
+  }
+}
+
+// ======================================================
+// CALLS (Voice/Video)
+// ======================================================
+
+Table calls {
+  id string [pk, note: 'UUID']
+  call_type varchar(50) [not null]
+  initiated_by string [not null]
+  conversation_id string
+  status varchar(50) [default: 'initiated']
+  started_at timestamp
+  ended_at timestamp
+  duration integer [note: 'In seconds']
+  recording_url text
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (initiated_by, created_at)
+    (conversation_id, created_at)
+    (status, started_at)
+  }
+}
+
+Table call_participants {
+  id string [pk, note: 'UUID']
+  call_id string [not null]
+  user_id string [not null]
+  joined_at timestamp
+  left_at timestamp
+  is_video_enabled boolean [default: true]
+  is_audio_enabled boolean [default: true]
+  is_screen_sharing boolean [default: false]
+
+  indexes {
+    (call_id, user_id) [unique]
+    (user_id, joined_at)
+  }
+}
+
+// ======================================================
+// TASKS & CALENDAR
+// ======================================================
+
+Table tasks {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  title varchar(500) [not null]
+  description text
+  priority varchar(50) [default: 'medium']
+  status varchar(50) [default: 'pending']
+  due_date timestamp
+  completed_at timestamp
+  estimated_duration integer [note: 'In minutes']
+  actual_duration integer [note: 'In minutes']
+  is_recurring boolean [default: false]
+  recurrence_pattern json
+  parent_task_id string
+  category_id string
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, status)
+    (user_id, due_date)
+    (user_id, priority, status)
+    (parent_task_id)
+    (category_id)
+  }
+}
+
+Table task_categories {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(200) [not null]
+  color varchar(20)
+  icon varchar(50)
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, name) [unique]
+  }
+}
+
+Table task_assignees {
+  id string [pk, note: 'UUID']
+  task_id string [not null]
+  user_id string [not null]
+  assigned_by string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (task_id, user_id) [unique]
+    (user_id)
+  }
+}
+
+Table task_dependencies {
+  id string [pk, note: 'UUID']
+  task_id string [not null]
+  depends_on_task_id string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (task_id, depends_on_task_id) [unique]
+    (depends_on_task_id)
+  }
+}
+
+Table calendar_events {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  title varchar(500) [not null]
+  description text
+  location text
+  start_time timestamp [not null]
+  end_time timestamp [not null]
+  is_all_day boolean [default: false]
+  recurrence_pattern json
+  reminder_time integer [note: 'Minutes before event']
+  color varchar(20)
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, start_time, end_time)
+    (user_id, start_time)
+    (user_id, is_all_day, start_time)
+  }
+}
+
+Table event_participants {
+  id string [pk, note: 'UUID']
+  event_id string [not null]
+  user_id string [not null]
+  status varchar(50) [default: 'pending']
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (event_id, user_id) [unique]
+    (user_id, status)
+  }
+}
+
+// ======================================================
+// NOTES & DOCUMENTS
+// ======================================================
+
+Table notes {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  title varchar(1000)
+  content text
+  content_json json
+  preview text
+  word_count integer
+  is_pinned boolean [default: false]
+  is_archived boolean [default: false]
+  is_public boolean [default: false]
+  color varchar(20)
+  notebook_id string
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+  deleted_at timestamp
+
+  indexes {
+    (user_id, is_pinned)
+    (user_id, is_archived)
+    (user_id, notebook_id)
+    (user_id, updated_at)
+    (user_id, created_at)
+  }
+}
+
+Table notebooks {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(500) [not null]
+  description text
+  parent_notebook_id string
+  color varchar(20)
+  icon varchar(50)
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, name) [unique]
+    (user_id, parent_notebook_id)
+  }
+}
+
+Table note_versions {
+  id string [pk, note: 'UUID']
+  note_id string [not null]
+  content text [not null]
+  content_json json
+  version_number integer [not null]
+  created_by string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (note_id, version_number) [unique]
+    (note_id, created_at)
+  }
+}
+
+Table note_collaborators {
+  id string [pk, note: 'UUID']
+  note_id string [not null]
+  user_id string [not null]
+  permission varchar(50) [default: 'view']
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (note_id, user_id) [unique]
+    (user_id)
+  }
+}
+
+Table note_templates {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(500) [not null]
+  description text
+  content json [not null]
+  category varchar(200)
+  is_public boolean [default: false]
+  usage_count integer [default: 0]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, category)
+    (is_public, usage_count)
+    (category, usage_count)
+  }
+}
+
+// ======================================================
+// TIME TRACKER
+// ======================================================
+
+Table time_entries {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  task_id string
+  description text
+  start_time timestamp [not null]
+  end_time timestamp
+  duration integer [note: 'In seconds']
+  is_manual boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, start_time, end_time)
+    (user_id, task_id)
+    (user_id, start_time)
+  }
+}
+
+Table pomodoro_sessions {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  task_id string
+  session_type varchar(50) [not null]
+  duration integer [not null, note: 'In seconds']
+  completed_duration integer [note: 'In seconds']
+  started_at timestamp [not null]
+  completed_at timestamp
+  is_completed boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, started_at, completed_at)
+    (user_id, is_completed)
+    (user_id, session_type)
+  }
+}
+
+Table focus_goals {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(500) [not null]
+  target_hours integer [not null]
+  period varchar(50) [not null]
+  progress_hours integer [default: 0]
+  start_date timestamp [not null]
+  end_date timestamp [not null]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, period, start_date, end_date)
+    (user_id, end_date)
+  }
+}
+
+// ======================================================
+// MEDIA FEED
+// ======================================================
+
+Table posts {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  content text
+  post_type varchar(50) [default: 'text']
+  visibility varchar(50) [default: 'public']
+  location varchar(500)
+  likes_count integer [default: 0]
+  comments_count integer [default: 0]
+  shares_count integer [default: 0]
+  is_edited boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+  deleted_at timestamp
+
+  indexes {
+    (user_id, created_at)
+    (visibility, created_at)
+    (post_type, created_at)
+    (likes_count, created_at)
+  }
+}
+
+Table post_media {
+  id string [pk, note: 'UUID']
+  post_id string [not null]
+  file_id string [not null]
+  media_type varchar(50) [not null]
+  order_index integer [not null]
+  caption text
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (post_id, order_index) [unique]
+    (post_id)
+  }
+}
+
+Table post_likes {
+  id string [pk, note: 'UUID']
+  post_id string [not null]
+  user_id string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (post_id, user_id) [unique]
+    (post_id, created_at)
+    (user_id, created_at)
+  }
+}
+
+Table comments {
+  id string [pk, note: 'UUID']
+  post_id string [not null]
+  user_id string [not null]
+  parent_comment_id string
+  content text [not null]
+  likes_count integer [default: 0]
+  is_edited boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+  deleted_at timestamp
+
+  indexes {
+    (post_id, created_at)
+    (parent_comment_id)
+    (user_id, created_at)
+  }
+}
+
+Table comment_likes {
+  id string [pk, note: 'UUID']
+  comment_id string [not null]
+  user_id string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (comment_id, user_id) [unique]
+    (comment_id, created_at)
+  }
+}
+
+Table stories {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  file_id string [not null]
+  media_type varchar(50) [not null]
+  caption text
+  background_color varchar(20)
+  text_content text
+  views_count integer [default: 0]
+  expires_at timestamp [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, expires_at)
+    (expires_at)
+    (user_id, created_at)
+  }
+}
+
+Table story_views {
+  id string [pk, note: 'UUID']
+  story_id string [not null]
+  user_id string [not null]
+  viewed_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (story_id, user_id) [unique]
+    (story_id, viewed_at)
+  }
+}
+
+Table hashtags {
+  id string [pk, note: 'UUID']
+  name varchar(200) [unique, not null]
+  posts_count integer [default: 0]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (name) [unique]
+    (posts_count)
+  }
+}
+
+Table post_hashtags {
+  id string [pk, note: 'UUID']
+  post_id string [not null]
+  hashtag_id string [not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (post_id, hashtag_id) [unique]
+    (hashtag_id, created_at)
+  }
+}
+
+// ======================================================
+// YOUTUBE INTEGRATION
+// ======================================================
+
+Table youtube_playlists {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  playlist_id varchar(255) [not null, note: 'YouTube playlist ID']
+  name varchar(500) [not null]
+  description text
+  thumbnail_url text
+  video_count integer [default: 0]
+  is_offline_available boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, playlist_id) [unique]
+    (user_id, is_offline_available)
+  }
+}
+
+Table youtube_videos {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  video_id varchar(255) [not null, note: 'YouTube video ID']
+  playlist_id string
+  title varchar(500) [not null]
+  description text
+  thumbnail_url text
+  duration integer [note: 'In seconds']
+  is_offline_available boolean [default: false]
+  offline_path text
+  watch_progress integer [default: 0, note: 'Percentage']
+  last_watched timestamp
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, video_id) [unique]
+    (user_id, playlist_id)
+    (user_id, is_offline_available)
+    (user_id, last_watched)
+  }
+}
+
+Table youtube_subscriptions {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  channel_id varchar(255) [not null, note: 'YouTube channel ID']
+  channel_name varchar(500) [not null]
+  channel_thumbnail text
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, channel_id) [unique]
+    (user_id, created_at)
+  }
+}
+
+// ======================================================
+// SHOPPING & PRICE COMPARISON
+// ======================================================
+
+Table products {
+  id string [pk, note: 'UUID']
+  name varchar(1000) [not null]
+  description text
+  brand varchar(500)
+  category varchar(500)
+  image_url text
+  upc varchar(100) [unique]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (upc) [unique]
+    (brand, category)
+    (category)
+    (name)
+  }
+}
+
+Table product_prices {
+  id string [pk, note: 'UUID']
+  product_id string [not null]
+  retailer varchar(500) [not null]
+  price decimal [not null, note: 'Stored as string/decimal in MongoDB']
+  currency varchar(10) [default: 'USD']
+  url text
+  in_stock boolean [default: true]
+  shipping_cost decimal
+  last_checked timestamp [default: `now()`, not null]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (product_id, retailer) [unique]
+    (product_id, price)
+    (retailer, in_stock)
+    (last_checked)
+  }
+}
+
+Table price_history {
+  id string [pk, note: 'UUID']
+  product_price_id string [not null]
+  price decimal [not null]
+  checked_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (product_price_id, checked_at)
+    (checked_at)
+  }
+}
+
+Table user_wishlists {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  name varchar(500) [not null]
+  description text
+  is_public boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, is_public)
+    (user_id, name) [unique]
+  }
+}
+
+Table wishlist_items {
+  id string [pk, note: 'UUID']
+  wishlist_id string [not null]
+  product_id string [not null]
+  notes text
+  priority varchar(50) [default: 'medium']
+  target_price decimal
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (wishlist_id, product_id) [unique]
+    (wishlist_id, priority)
+    (product_id)
+  }
+}
+
+Table price_alerts {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  product_id string [not null]
+  target_price decimal [not null]
+  is_active boolean [default: true]
+  triggered_at timestamp
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, product_id) [unique]
+    (user_id, is_active)
+    (product_id, is_active)
+  }
+}
+
+// ======================================================
+// AI ASSISTANT
+// ======================================================
+
+Table ai_conversations {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  title varchar(500)
+  context json
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, updated_at)
+    (user_id, created_at)
+  }
+}
+
+Table ai_messages {
+  id string [pk, note: 'UUID']
+  conversation_id string [not null]
+  role varchar(50) [not null]
+  content text [not null]
+  tokens_used integer
+  model_used varchar(200)
+  metadata json
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (conversation_id, created_at)
+    (conversation_id, role)
+  }
+}
+
+Table ai_memory {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  memory_key varchar(500) [not null]
+  memory_value json [not null]
+  context varchar(1000)
+  expires_at timestamp
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, memory_key) [unique]
+    (user_id, expires_at)
+    (user_id, context)
+  }
+}
+
+Table ai_suggestions {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  suggestion_type varchar(100) [not null]
+  content json [not null]
+  context_id string
+  is_accepted boolean [default: false]
+  is_dismissed boolean [default: false]
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, created_at)
+    (user_id, suggestion_type, is_accepted)
+    (user_id, is_dismissed)
+  }
+}
+
+// ======================================================
+// NOTIFICATIONS
+// ======================================================
+
+Table notifications {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  type varchar(100) [not null]
+  title varchar(500) [not null]
+  body text
+  data json
+  is_read boolean [default: false]
+  is_clicked boolean [default: false]
+  action_url text
+  image_url text
+  created_at timestamp [default: `now()`, not null]
+  read_at timestamp
+
+  indexes {
+    (user_id, created_at)
+    (user_id, is_read, created_at)
+    (user_id, type, created_at)
+    (user_id, is_clicked)
+  }
+}
+
+Table notification_settings {
+  id string [pk, note: 'UUID']
+  user_id string [unique, not null]
+  email_notifications json [default: '{}']
+  push_notifications json [default: '{}']
+  in_app_notifications json [default: '{}']
+  quiet_hours_start varchar(10) [note: 'HH:MM format']
+  quiet_hours_end varchar(10) [note: 'HH:MM format']
+  quiet_hours_timezone varchar(100)
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id) [unique]
+  }
+}
+
+// ======================================================
+// ANALYTICS & USER ACTIVITY
+// ======================================================
+
+Table user_activities {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  activity_type varchar(200) [not null]
+  entity_type varchar(200)
+  entity_id string
+  metadata json
+  ip_address varchar(50)
+  user_agent text
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, created_at)
+    (activity_type, created_at)
+    (entity_type, entity_id)
+    (created_at)
+  }
+}
+
+Table feature_usage {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  feature_name varchar(200) [not null]
+  action varchar(200) [not null]
+  duration integer [note: 'In seconds']
+  metadata json
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, feature_name, created_at)
+    (feature_name, action, created_at)
+    (created_at)
+  }
+}
+
+// ======================================================
+// CODE PLAYGROUND (Optional)
+// ======================================================
+
+Table code_snippets {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  title varchar(500) [not null]
+  description text
+  language varchar(100) [not null]
+  code text [not null]
+  is_public boolean [default: false]
+  tags json
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, is_public)
+    (user_id, language)
+    (is_public, language)
+    (created_at)
+  }
+}
+
+Table code_executions {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  snippet_id string
+  language varchar(100) [not null]
+  code text [not null]
+  input text
+  output text
+  error text
+  execution_time integer [note: 'In milliseconds']
+  memory_used integer [note: 'In KB']
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, created_at)
+    (snippet_id)
+    (language, created_at)
+  }
+}
+
+Table coding_challenges {
+  id string [pk, note: 'UUID']
+  title varchar(500) [not null]
+  description text [not null]
+  difficulty varchar(50) [not null]
+  category varchar(200)
+  test_cases json [not null]
+  solution_template json
+  hints json
+  created_at timestamp [default: `now()`, not null]
+  updated_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (difficulty, category)
+    (category, created_at)
+    (difficulty)
+  }
+}
+
+Table challenge_submissions {
+  id string [pk, note: 'UUID']
+  user_id string [not null]
+  challenge_id string [not null]
+  code text [not null]
+  language varchar(100) [not null]
+  status varchar(50) [not null]
+  execution_time integer
+  memory_used integer
+  test_cases_passed integer
+  total_test_cases integer
+  created_at timestamp [default: `now()`, not null]
+
+  indexes {
+    (user_id, challenge_id, created_at)
+    (challenge_id, status)
+    (user_id, status, created_at)
+    (challenge_id, language)
+  }
+}
+
+// ======================================================
+// REFERENCES
+// ======================================================
+
+// User references
+Ref: users.id < sessions.user_id
+Ref: users.id < user_devices.user_id
+Ref: users.id < user_follows.follower_id
+Ref: users.id < user_follows.following_id
+Ref: users.id < user_blocks.blocker_id
+Ref: users.id < user_blocks.blocked_id
+
+// File references
+Ref: users.id < files.user_id
+Ref: users.id < folders.user_id
+Ref: folders.id < files.parent_folder_id
+Ref: folders.id < folders.parent_folder_id
+Ref: users.id < file_shares.shared_by
+Ref: users.id < file_shares.shared_with_user_id
+Ref: files.id < file_shares.file_id
+Ref: folders.id < file_shares.folder_id
+Ref: users.id < file_tags.user_id
+Ref: file_tags.id < file_tag_mappings.tag_id
+Ref: files.id < file_tag_mappings.file_id
+Ref: folders.id < file_tag_mappings.folder_id
+
+// Messaging references
+Ref: users.id < conversations.created_by
+Ref: users.id < conversation_participants.user_id
+Ref: conversations.id < conversation_participants.conversation_id
+Ref: conversations.id < messages.conversation_id
+Ref: users.id < messages.sender_id
+Ref: messages.id < messages.reply_to_id
+Ref: messages.id < messages.forwarded_from_id
+Ref: messages.id < message_reactions.message_id
+Ref: users.id < message_reactions.user_id
+Ref: messages.id < message_read_receipts.message_id
+Ref: users.id < message_read_receipts.user_id
+Ref: messages.id < attachments.message_id
+Ref: files.id < attachments.file_id
+Ref: conversations.id < conversations.pinned_message_id
+Ref: conversation_participants.id < conversation_participants.last_read_message_id
+
+// Call references
+Ref: users.id < calls.initiated_by
+Ref: conversations.id < calls.conversation_id
+Ref: calls.id < call_participants.call_id
+Ref: users.id < call_participants.user_id
+
+// Tasks references
+Ref: users.id < tasks.user_id
+Ref: tasks.id < tasks.parent_task_id
+Ref: users.id < task_categories.user_id
+Ref: task_categories.id < tasks.category_id
+Ref: tasks.id < task_assignees.task_id
+Ref: users.id < task_assignees.user_id
+Ref: users.id < task_assignees.assigned_by
+Ref: tasks.id < task_dependencies.task_id
+Ref: tasks.id < task_dependencies.depends_on_task_id
+
+// Calendar references
+Ref: users.id < calendar_events.user_id
+Ref: calendar_events.id < event_participants.event_id
+Ref: users.id < event_participants.user_id
+
+// Notes references
+Ref: users.id < notes.user_id
+Ref: users.id < notebooks.user_id
+Ref: notebooks.id < notes.notebook_id
+Ref: notebooks.id < notebooks.parent_notebook_id
+Ref: notes.id < note_versions.note_id
+Ref: users.id < note_versions.created_by
+Ref: notes.id < note_collaborators.note_id
+Ref: users.id < note_collaborators.user_id
+Ref: users.id < note_templates.user_id
+
+// Time tracker references
+Ref: users.id < time_entries.user_id
+Ref: tasks.id < time_entries.task_id
+Ref: users.id < pomodoro_sessions.user_id
+Ref: tasks.id < pomodoro_sessions.task_id
+Ref: users.id < focus_goals.user_id
+
+// Media feed references
+Ref: users.id < posts.user_id
+Ref: posts.id < post_media.post_id
+Ref: files.id < post_media.file_id
+Ref: posts.id < post_likes.post_id
+Ref: users.id < post_likes.user_id
+Ref: posts.id < comments.post_id
+Ref: users.id < comments.user_id
+Ref: comments.id < comments.parent_comment_id
+Ref: comments.id < comment_likes.comment_id
+Ref: users.id < comment_likes.user_id
+Ref: users.id < stories.user_id
+Ref: files.id < stories.file_id
+Ref: stories.id < story_views.story_id
+Ref: users.id < story_views.user_id
+Ref: posts.id < post_hashtags.post_id
+Ref: hashtags.id < post_hashtags.hashtag_id
+
+// YouTube references
+Ref: users.id < youtube_playlists.user_id
+Ref: users.id < youtube_videos.user_id
+Ref: youtube_playlists.id < youtube_videos.playlist_id
+Ref: users.id < youtube_subscriptions.user_id
+
+// Shopping references
+Ref: products.id < product_prices.product_id
+Ref: product_prices.id < price_history.product_price_id
+Ref: users.id < user_wishlists.user_id
+Ref: user_wishlists.id < wishlist_items.wishlist_id
+Ref: products.id < wishlist_items.product_id
+Ref: users.id < price_alerts.user_id
+Ref: products.id < price_alerts.product_id
+
+// AI references
+Ref: users.id < ai_conversations.user_id
+Ref: ai_conversations.id < ai_messages.conversation_id
+Ref: users.id < ai_memory.user_id
+Ref: users.id < ai_suggestions.user_id
+
+// Notification references
+Ref: users.id < notifications.user_id
+Ref: users.id < notification_settings.user_id
+
+// Activity references
+Ref: users.id < user_activities.user_id
+Ref: users.id < feature_usage.user_id
+
+// Code playground references
+Ref: users.id < code_snippets.user_id
+Ref: users.id < code_executions.user_id
+Ref: code_snippets.id < code_executions.snippet_id
+Ref: users.id < challenge_submissions.user_id
+Ref: coding_challenges.id < challenge_submissions.challenge_id

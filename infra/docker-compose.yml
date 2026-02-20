@@ -1,0 +1,70 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo:7
+    container_name: unified-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7
+    container_name: unified-redis
+    ports:
+      - '6379:6379'
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: apps/auth-service/Dockerfile
+    environment:
+      PORT: 3001
+      MONGODB_URI: mongodb://mongo:27017/unified_auth
+    depends_on:
+      - mongo
+    ports:
+      - '3001:3001'
+
+  user-service:
+    build:
+      context: ..
+      dockerfile: apps/user-service/Dockerfile
+    environment:
+      PORT: 3002
+      MONGODB_URI: mongodb://mongo:27017/unified_users
+    depends_on:
+      - mongo
+    ports:
+      - '3002:3002'
+
+  productivity-service:
+    build:
+      context: ..
+      dockerfile: apps/productivity-service/Dockerfile
+    environment:
+      PORT: 3006
+      MONGODB_URI: mongodb://mongo:27017/unified_productivity
+    depends_on:
+      - mongo
+    ports:
+      - '3006:3006'
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: apps/gateway/Dockerfile
+    environment:
+      PORT: 3000
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      PRODUCTIVITY_SERVICE_URL: http://productivity-service:3006
+    depends_on:
+      - auth-service
+      - user-service
+      - productivity-service
+    ports:
+      - '3000:3000'
+
+volumes:
+  mongo_data:
