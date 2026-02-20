@@ -22,6 +22,14 @@ Each backend app already includes:
 ## 2. Build/Install Settings (for each project)
 
 - Install Command: `pnpm install`
+- Root Directory:
+  - Web: `apps/web`
+  - Gateway: `apps/gateway`
+  - Auth: `apps/auth-service`
+  - User: `apps/user-service`
+  - Productivity: `apps/productivity-service`
+  - Messaging: `apps/messaging-service`
+  - File: `apps/file-service`
 - Build Command:
   - Web: `pnpm --filter @unified/web build`
   - Gateway: `pnpm --filter @unified/shared build && pnpm --filter @unified/gateway build`
@@ -39,6 +47,7 @@ Each backend app already includes:
 
 ### Gateway (`apps/gateway`)
 
+- `NODE_ENV=production`
 - `CLIENT_ORIGIN=https://<web-project>.vercel.app`
 - `AUTH_SERVICE_URL=https://<auth-project>.vercel.app`
 - `USER_SERVICE_URL=https://<user-project>.vercel.app`
@@ -48,6 +57,7 @@ Each backend app already includes:
 
 ### Auth Service (`apps/auth-service`)
 
+- `NODE_ENV=production`
 - `MONGODB_URI=<atlas-uri>`
 - `CLIENT_ORIGIN=https://<web-project>.vercel.app`
 - `JWT_ACCESS_SECRET=<strong-secret>`
@@ -58,9 +68,25 @@ Each backend app already includes:
 
 For each of these services:
 
+- `NODE_ENV=production`
 - `MONGODB_URI=<atlas-uri>`
 - `CLIENT_ORIGIN=https://<web-project>.vercel.app`
+- `JWT_ACCESS_SECRET=<same value as auth-service>`
+- `JWT_REFRESH_SECRET=<same value as auth-service>`
 - Any service-specific envs from local `.env` (ImageKit/Cloudinary etc. for file-service)
+
+### File Service Provider Vars (`apps/file-service`)
+
+Set at least one provider correctly:
+
+- ImageKit:
+  - `IMAGEKIT_PUBLIC_KEY`
+  - `IMAGEKIT_PRIVATE_KEY`
+  - `IMAGEKIT_URL_ENDPOINT`
+- Cloudinary:
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_API_KEY`
+  - `CLOUDINARY_API_SECRET`
 
 ## 4. Deploy Order
 
@@ -77,3 +103,12 @@ For each of these services:
   - dashboard module navigation
   - file upload/delete
   - nested folder navigation refresh persistence
+
+## 6. If You See `FUNCTION_INVOCATION_FAILED`
+
+- Check each failed project logs in Vercel.
+- Most common cause in this repo:
+  - `MONGODB_URI` missing (service falls back to localhost in dev only, not valid for Vercel)
+  - missing JWT secrets on non-auth services
+  - gateway URLs still pointing to localhost
+- Re-deploy after updating envs.

@@ -6,4 +6,15 @@ const schema = z.object({
   CLIENT_ORIGIN: z.string().default('http://localhost:3100'),
 });
 
-export const env = schema.parse(process.env);
+const parsed = schema.parse(process.env);
+
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.MONGODB_URI || parsed.MONGODB_URI.includes('localhost')) {
+    throw new Error('productivity-service: MONGODB_URI must be set to a remote database in production');
+  }
+  if (!process.env.CLIENT_ORIGIN) {
+    throw new Error('productivity-service: CLIENT_ORIGIN is required in production');
+  }
+}
+
+export const env = parsed;

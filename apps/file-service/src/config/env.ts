@@ -14,5 +14,15 @@ const schema = z.object({
   CLOUDINARY_API_SECRET: z.string().optional(),
 });
 
-export const env = schema.parse(process.env);
+const parsed = schema.parse(process.env);
 
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.MONGODB_URI || parsed.MONGODB_URI.includes('localhost')) {
+    throw new Error('file-service: MONGODB_URI must be set to a remote database in production');
+  }
+  if (!process.env.CLIENT_ORIGIN) {
+    throw new Error('file-service: CLIENT_ORIGIN is required in production');
+  }
+}
+
+export const env = parsed;
