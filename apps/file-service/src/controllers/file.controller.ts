@@ -27,6 +27,11 @@ export class FileController {
     return ok(res, data, 'File created', 201);
   }
 
+  static async updateFile(req: AuthenticatedRequest, res: Response) {
+    const data = await FileService.updateFile(req.user!.id, String(req.params.id), req.body);
+    return ok(res, data, 'File updated');
+  }
+
   static async deleteFile(req: AuthenticatedRequest, res: Response) {
     await FileService.deleteFile(req.user!.id, String(req.params.id));
     return ok(res, null, 'File deleted');
@@ -38,6 +43,11 @@ export class FileController {
       req.query.parentFolderId ? String(req.query.parentFolderId) : undefined,
     );
     return ok(res, data, 'Folders fetched');
+  }
+
+  static async getFolder(req: AuthenticatedRequest, res: Response) {
+    const data = await FileService.getFolder(req.user!.id, String(req.params.id));
+    return ok(res, data, 'Folder fetched');
   }
 
   static async createFolder(req: AuthenticatedRequest, res: Response) {
@@ -55,4 +65,3 @@ export class FileController {
     return ok(res, null, 'Folder deleted');
   }
 }
-

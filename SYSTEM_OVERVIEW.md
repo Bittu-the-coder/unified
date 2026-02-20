@@ -8,6 +8,7 @@ This document describes the current implementation status and runtime flow.
 - `apps/user-service` (`:3002`): profile/social graph (follow/block/search)
 - `apps/productivity-service` (`:3006`): tasks, notes, events, time, goals
 - `apps/messaging-service` (`:3007`): conversations + messages CRUD
+- `apps/file-service` (`:3008`): personal cloud files/folders + storage quota
 - `apps/gateway` (`:3000`): single API entrypoint/proxy
 - `apps/web` (`:3100`): Next.js 16 frontend
 - `packages/shared`: shared auth/errors/validation/logger helpers
@@ -20,6 +21,7 @@ Frontend calls only `NEXT_PUBLIC_API_BASE` (gateway). Gateway proxies:
 - `/users/*` -> `USER_SERVICE_URL` (`/users/*`)
 - `/productivity/*` -> `PRODUCTIVITY_SERVICE_URL` (`/productivity/*`)
 - `/messaging/*` -> `MESSAGING_SERVICE_URL` (`/messaging/*`)
+- `/file-cloud/*` -> `FILE_SERVICE_URL` (`/file-cloud/*`)
 
 ## 3. Frontend Architecture
 
@@ -94,6 +96,24 @@ Primary collections:
 - `conversations`
 - `messages`
 
+### 4.5 File Service
+
+- `GET /file-cloud/quota`
+- `GET /file-cloud/files`, `POST /file-cloud/files`, `DELETE /file-cloud/files/:id`
+- `GET /file-cloud/folders`, `POST /file-cloud/folders`, `PATCH /file-cloud/folders/:id`, `DELETE /file-cloud/folders/:id`
+- `POST /file-cloud/upload/signature` for provider-side direct uploads
+
+Quota policy:
+
+- Free plan limit is `250 MB` per user (`262144000` bytes)
+- quota increments on file create and decrements on file delete
+- upload is blocked when quota would be exceeded
+
+Providers:
+
+- ImageKit (signed upload params)
+- Cloudinary (signed upload params)
+
 ## 5. Environment Variables
 
 ### Gateway
@@ -104,6 +124,7 @@ Primary collections:
 - `USER_SERVICE_URL`
 - `PRODUCTIVITY_SERVICE_URL`
 - `MESSAGING_SERVICE_URL`
+- `FILE_SERVICE_URL`
 
 ### Auth/User/Productivity/Messaging Services
 
@@ -140,3 +161,11 @@ Implemented and working:
 - Messaging module (foundation + frontend start)
 - Gateway integration
 - Next.js 16 frontend base with route-based dashboard
+- File cloud nested directory UX with drag/drop upload + move
+- File cloud folder refresh persistence (restores current folder after reload)
+- Provider file delete flow with metadata + ImageKit lookup fallback for legacy records
+
+## 8. Deployment
+
+- Full Vercel multi-project deployment guide: `DEPLOYMENT_VERCEL.md`
+- Backend services include Vercel serverless handlers under `apps/*/api/index.ts`

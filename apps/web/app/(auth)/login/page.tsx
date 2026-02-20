@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi, authTokenStore } from '@/lib/api';
+import { AuthShell } from '@/components/auth/auth-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,14 +58,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-4">
-      <div className="flex justify-end">
-        <ThemeToggle />
-      </div>
+    <AuthShell
+      title="Welcome back to Unified"
+      description="Sign in once and continue with messaging, productivity, and cloud workflows from one place."
+      footerLabel="New user?"
+      footerLinkLabel="Create account"
+      footerLinkHref="/register"
+    >
       <Card>
         <CardHeader>
-          <CardTitle>Welcome Back</CardTitle>
-          <CardDescription>Sign in to Unified workspace.</CardDescription>
+          <CardTitle>Sign In</CardTitle>
+          <CardDescription>Access your workspace securely.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-3">
@@ -90,15 +92,9 @@ export default function LoginPage() {
               <Button variant="secondary" onClick={onResetPassword}>Reset</Button>
             </div>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            New user?{' '}
-            <Link className="text-accent underline-offset-4 hover:underline" href="/register">
-              Create account
-            </Link>
-          </p>
         </CardContent>
       </Card>
-    </div>
+    </AuthShell>
   );
 }
 

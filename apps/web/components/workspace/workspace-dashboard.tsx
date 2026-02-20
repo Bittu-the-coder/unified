@@ -1,7 +1,9 @@
 ﻿'use client';
 
 import Link from 'next/link';
+import { FileCloudWorkspace } from '@/components/file-cloud/file-cloud-workspace';
 import { MessagingWorkspace } from '@/components/messaging/messaging-workspace';
+import { ProductivityWorkspace } from '@/components/productivity/productivity-workspace';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +34,7 @@ import {
 import { cn } from '@/lib/utils';
 import { comingSoonCopy, serviceMenu, type ServiceKey } from './config';
 import { useEffect, useMemo, useState } from 'react';
+import { LogOut } from 'lucide-react';
 
 const isServiceKey = (value: string): value is ServiceKey => {
   return serviceMenu.some((item) => item.key === value);
@@ -855,295 +858,23 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
   );
 
   const renderProductivity = () => (
-    <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Tasks</CardTitle>
-            <CardDescription>Create and manage tasks with categories and priorities.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input placeholder="Add task" value={todoTitle} onChange={(e) => setTodoTitle(e.target.value)} />
-              <Button onClick={addTodo}>Add</Button>
-            </div>
-            <div className="max-h-64 space-y-2 overflow-auto">
-              {todos.map((todo) => (
-                <div key={todo._id} className="flex items-center justify-between rounded-xl border border-border p-3">
-                  <div>
-                    <p className="font-medium">{todo.title}</p>
-                    <p className="text-xs text-muted-foreground">{todo.priority} · {todo.status.replace('_', ' ')}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => toggleTodoStatus(todo)}>
-                      Next
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => deleteTodo(todo._id)}>
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              {todos.length === 0 && <p className="text-sm text-muted-foreground">No tasks yet.</p>}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Task Categories</CardTitle>
-            <CardDescription>Organize tasks by category.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input placeholder="Category name" value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
-              <Button variant="secondary" onClick={addCategory}>Add</Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((c) => (
-                <div key={c._id} className="flex items-center gap-1 rounded-lg border border-border px-2 py-1">
-                  <Badge variant="outline">{c.name}</Badge>
-                  <Button size="sm" variant="ghost" onClick={() => renameCategory(c._id, c.name)}>
-                    Edit
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => deleteCategory(c._id)}>
-                    Delete
-                  </Button>
-                </div>
-              ))}
-              {categories.length === 0 && <p className="text-sm text-muted-foreground">No categories.</p>}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Dependencies</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Input placeholder="Task Id" value={todoDependencyTaskId} onChange={(e) => setTodoDependencyTaskId(e.target.value)} />
-            <div className="flex gap-2">
-              <Input
-                placeholder="Depends on Task Id"
-                value={todoDependsOnTaskId}
-                onChange={(e) => setTodoDependsOnTaskId(e.target.value)}
-              />
-              <Button variant="outline" onClick={addDependency}>Add</Button>
-            </div>
-            <div className="max-h-32 space-y-2 overflow-auto">
-              {dependencies.map((d) => (
-                <div key={d._id} className="flex items-center justify-between rounded-lg border border-border p-2 text-xs">
-                  <span>
-                    {d.taskId} {'<-'} {d.dependsOnTaskId}
-                  </span>
-                  <Button size="sm" variant="ghost" onClick={() => removeDependency(d.taskId, d.dependsOnTaskId)}>
-                    Remove
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Progress</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Input placeholder="Todo Id (optional)" value={progressTodoId} onChange={(e) => setProgressTodoId(e.target.value)} />
-            <Input placeholder="Activity Type" value={progressType} onChange={(e) => setProgressType(e.target.value)} />
-            <Button variant="outline" onClick={addProgressRecord}>Record</Button>
-            <div className="max-h-32 space-y-2 overflow-auto">
-              {progressRecords.slice(0, 8).map((p) => (
-                <div key={p._id} className="rounded-lg border border-border p-2 text-xs">
-                  {p.activityType} · {new Date(p.createdAt).toLocaleString()}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Calendar Events</CardTitle>
-            <CardDescription>Plan your schedule and reminders.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input placeholder="Event title" value={eventTitle} onChange={(e) => setEventTitle(e.target.value)} />
-              <Button variant="secondary" onClick={addEvent}>Add</Button>
-            </div>
-            <div className="max-h-52 space-y-2 overflow-auto">
-              {events.map((e) => (
-                <div key={e._id} className="flex items-center justify-between rounded-xl border border-border p-3">
-                  <div>
-                    <p className="font-medium">{e.title}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(e.startTime).toLocaleString()}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => renameEvent(e._id, e.title)}>Edit</Button>
-                    <Button size="sm" variant="ghost" onClick={() => deleteEvent(e._id)}>Delete</Button>
-                  </div>
-                </div>
-              ))}
-              {events.length === 0 && <p className="text-sm text-muted-foreground">No events.</p>}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Notebooks</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input placeholder="Notebook name" value={notebookName} onChange={(e) => setNotebookName(e.target.value)} />
-              <Button variant="secondary" onClick={addNotebook}>Add</Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant={selectedNotebookId ? 'outline' : 'default'} onClick={() => setSelectedNotebookId('')}>
-                All
-              </Button>
-              {notebooks.map((notebook) => (
-                <div key={notebook._id} className="flex items-center gap-1 rounded-lg border border-border px-2 py-1">
-                  <Button
-                    size="sm"
-                    variant={selectedNotebookId === notebook._id ? 'default' : 'ghost'}
-                    onClick={() => setSelectedNotebookId(notebook._id)}
-                  >
-                    {notebook.name}
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => renameNotebook(notebook._id, notebook.name)}>Edit</Button>
-                  <Button size="sm" variant="ghost" onClick={() => deleteNotebook(notebook._id)}>Delete</Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Notes</CardTitle>
-            <CardDescription>Capture ideas with notebook support.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Input placeholder="Note title" value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} />
-            <Textarea placeholder="Note content" value={noteContent} onChange={(e) => setNoteContent(e.target.value)} />
-            <div className="flex gap-2">
-              <Button onClick={addNote}>Save Note</Button>
-              <Badge variant="outline">Notebooks: {notebooks.length}</Badge>
-            </div>
-            <div className="max-h-52 space-y-2 overflow-auto">
-              {notes.map((n) => (
-                <div key={n._id} className="rounded-xl border border-border p-3">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium">{n.title ?? 'Untitled note'}</p>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => updateNote(n._id, n.content ?? '')}>Edit</Button>
-                      <Button size="sm" variant="ghost" onClick={() => deleteNote(n._id)}>Delete</Button>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{(n.content ?? '').slice(0, 90)}</p>
-                  <Button size="sm" variant="ghost" onClick={() => loadNoteVersions(n._id)}>Versions</Button>
-                </div>
-              ))}
-              {notes.length === 0 && <p className="text-sm text-muted-foreground">No notes.</p>}
-            </div>
-            {selectedNoteId && (
-              <div className="rounded-lg border border-border p-3">
-                <p className="mb-2 text-sm font-medium">Note versions</p>
-                <div className="max-h-32 space-y-2 overflow-auto">
-                  {noteVersions.map((v) => (
-                    <div key={v._id} className="text-xs text-muted-foreground">
-                      v{v.versionNumber} · {new Date(v.createdAt).toLocaleString()}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Time Entries</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" onClick={createQuickTimeEntry}>Add 30-min Session</Button>
-            <div className="max-h-40 space-y-2 overflow-auto">
-              {timeEntries.map((entry) => (
-                <div key={entry._id} className="flex items-center justify-between rounded-lg border border-border p-2 text-xs">
-                  <div>
-                    <p>{entry.description ?? 'Time entry'}</p>
-                    <p className="text-muted-foreground">{entry.duration ?? 0}s</p>
-                  </div>
-                  <div className="flex gap-2">
-                    {!entry.endTime && <Button size="sm" variant="outline" onClick={() => closeTimeEntry(entry)}>Stop</Button>}
-                    <Button size="sm" variant="ghost" onClick={() => deleteTimeEntry(entry._id)}>Delete</Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Pomodoro</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" onClick={createQuickPomodoro}>Start Focus (25m)</Button>
-            <div className="max-h-40 space-y-2 overflow-auto">
-              {pomodoroSessions.map((session) => (
-                <div key={session._id} className="flex items-center justify-between rounded-lg border border-border p-2 text-xs">
-                  <p>{session.sessionType} · {session.duration}s</p>
-                  {!session.isCompleted && (
-                    <Button size="sm" variant="ghost" onClick={() => completePomodoro(session._id, session.duration)}>
-                      Complete
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Focus Goals</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input placeholder="Goal name" value={goalName} onChange={(e) => setGoalName(e.target.value)} />
-              <Button variant="secondary" onClick={addGoal}>Add</Button>
-            </div>
-            <div className="max-h-40 space-y-2 overflow-auto">
-              {focusGoals.map((g) => (
-                <div key={g._id} className="rounded-xl border border-border p-3">
-                  <p className="font-medium">{g.name}</p>
-                  <p className="text-xs text-muted-foreground">{g.progressHours}/{g.targetHours}h · {g.period}</p>
-                  <div className="mt-2 flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => incrementGoalProgress(g)}>+1h</Button>
-                    <Button size="sm" variant="ghost" onClick={() => deleteGoal(g._id)}>Delete</Button>
-                  </div>
-                </div>
-              ))}
-              {focusGoals.length === 0 && <p className="text-sm text-muted-foreground">No goals.</p>}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-    </div>
+    <ProductivityWorkspace
+      onError={(message) => setError(message)}
+      onSuccess={(message) => setSuccess(message)}
+    />
   );
 
   const renderMessages = () => (
     <MessagingWorkspace
       currentUserId={user?.id ?? ''}
       onError={(message) => setError(message)}
+    />
+  );
+
+  const renderFileCloud = () => (
+    <FileCloudWorkspace
+      onError={(message) => setError(message)}
+      onSuccess={(message) => setSuccess(message)}
     />
   );
 
@@ -1168,17 +899,18 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
     if (selected === 'auth-user') return renderAuthUser();
     if (selected === 'productivity') return renderProductivity();
     if (selected === 'messages') return renderMessages();
+    if (selected === 'files') return renderFileCloud();
     return renderComingSoon(selected);
   };
 
   return (
-    <div className="grid min-h-[calc(100vh-4rem)] gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="rounded-2xl border border-border bg-surface p-4">
+    <div className="grid min-h-[calc(100vh-4rem)] gap-4 lg:grid-cols-[290px_minmax(0,1fr)]">
+      <aside className="h-fit rounded-2xl border border-border bg-surface/90 p-4 backdrop-blur lg:sticky lg:top-4">
         <div className="mb-4 space-y-1">
           <h1 className="text-xl font-bold">Unified Workspace</h1>
           <p className="text-sm text-muted-foreground">All services in one premium interface.</p>
         </div>
-        <div className="mb-4 flex gap-2">
+        <div className="mb-4 flex flex-wrap gap-2">
           <ThemeToggle />
           <Button
             variant="outline"
@@ -1187,27 +919,31 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
               await authApi.logout();
               window.location.href = '/login';
             }}
+            className="gap-2"
+            title="Logout"
           >
-            Logout
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Logout</span>
           </Button>
         </div>
-        <nav className="space-y-1">
+        <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 lg:mx-0 lg:block lg:space-y-1 lg:overflow-visible lg:px-0 lg:pb-0">
           {serviceMenu.map((item) => (
             <Link
               key={item.key}
               href={`/dashboard/${item.key}`}
               className={cn(
-                'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition',
+                'flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition lg:w-full',
                 selected === item.key ? 'bg-primary text-white' : 'text-foreground hover:bg-muted',
               )}
+              title={item.title}
             >
               <item.icon className="h-4 w-4" />
-              {item.title}
+              <span className="hidden sm:inline lg:inline">{item.title}</span>
             </Link>
           ))}
         </nav>
       </aside>
-      <section className="space-y-4">
+      <section className="space-y-4 min-w-0">
         {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600">{error}</p>}
         {success && <p className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">{success}</p>}
         {renderMain()}
@@ -1215,6 +951,8 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
     </div>
   );
 }
+
+
 
 
 

@@ -57,3 +57,12 @@ app.use(
     pathRewrite: (path) => `/messaging${path}`,
   }),
 );
+
+app.use(
+  '/file-cloud',
+  createProxyMiddleware({
+    target: env.FILE_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: (path) => `/file-cloud${path}`,
+  }),
+);

@@ -107,6 +107,48 @@ export type FocusGoal = {
   endDate: string;
 };
 
+export type CloudFile = {
+  _id: string;
+  userId: string;
+  name: string;
+  originalName: string;
+  description?: string;
+  fileType: string;
+  mimeType?: string;
+  size: number;
+  storageProvider: 'imagekit' | 'cloudinary';
+  providerFileId?: string;
+  providerResourceType?: 'image' | 'video' | 'raw';
+  storagePath: string;
+  publicUrl: string;
+  thumbnailUrl?: string;
+  hash?: string;
+  isPublic: boolean;
+  isStarred: boolean;
+  version: number;
+  parentFolderId?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CloudFolder = {
+  _id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  parentFolderId?: string;
+  isStarred: boolean;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CloudQuota = {
+  usedBytes: number;
+  limitBytes: number;
+  remainingBytes: number;
+};
+
 export type Conversation = {
   _id: string;
   type: 'direct' | 'group';
@@ -478,6 +520,77 @@ export const messagingApi = {
     }),
   removeReaction: (messageId: string, emoji: string) =>
     apiFetch<ChatMessage>(`/messaging/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`, {
+      method: 'DELETE',
+    }),
+};
+
+export const fileCloudApi = {
+  quota: () => apiFetch<CloudQuota>('/file-cloud/quota'),
+  listFiles: (params?: { folderId?: string; search?: string; limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.folderId) query.set('folderId', params.folderId);
+    if (params?.search) query.set('search', params.search);
+    if (params?.limit) query.set('limit', String(params.limit));
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return apiFetch<CloudFile[]>(`/file-cloud/files${suffix}`);
+  },
+  createUploadSignature: (payload: { provider?: 'imagekit' | 'cloudinary'; fileName: string; folder?: string }) =>
+    apiFetch<{
+      provider: 'imagekit' | 'cloudinary';
+      uploadUrl: string;
+      params: Record<string, string | number | boolean>;
+    }>('/file-cloud/upload/signature', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  createFile: (payload: {
+    name: string;
+    originalName: string;
+    description?: string;
+    fileType: string;
+    mimeType?: string;
+    size: number;
+    storageProvider: 'imagekit' | 'cloudinary';
+    providerFileId?: string;
+    providerResourceType?: 'image' | 'video' | 'raw';
+    storagePath: string;
+    publicUrl: string;
+    thumbnailUrl?: string;
+    hash?: string;
+    parentFolderId?: string;
+    isPublic?: boolean;
+  }) =>
+    apiFetch<CloudFile>('/file-cloud/files', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  deleteFile: (fileId: string) =>
+    apiFetch<null>(`/file-cloud/files/${fileId}`, {
+      method: 'DELETE',
+    }),
+  updateFile: (
+    fileId: string,
+    payload: { name?: string; description?: string; parentFolderId?: string | null; isPublic?: boolean; isStarred?: boolean },
+  ) =>
+    apiFetch<CloudFile>(`/file-cloud/files/${fileId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  listFolders: (parentFolderId?: string) =>
+    apiFetch<CloudFolder[]>(`/file-cloud/folders${parentFolderId ? `?parentFolderId=${encodeURIComponent(parentFolderId)}` : ''}`),
+  getFolder: (folderId: string) => apiFetch<CloudFolder>(`/file-cloud/folders/${folderId}`),
+  createFolder: (payload: { name: string; description?: string; parentFolderId?: string }) =>
+    apiFetch<CloudFolder>('/file-cloud/folders', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  updateFolder: (folderId: string, payload: { name?: string; description?: string; parentFolderId?: string | null }) =>
+    apiFetch<CloudFolder>(`/file-cloud/folders/${folderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  deleteFolder: (folderId: string) =>
+    apiFetch<null>(`/file-cloud/folders/${folderId}`, {
       method: 'DELETE',
     }),
 };

@@ -9,6 +9,8 @@ export interface IFile {
   mimeType?: string;
   size: number;
   storageProvider: 'imagekit' | 'cloudinary';
+  providerFileId?: string;
+  providerResourceType?: 'image' | 'video' | 'raw';
   storagePath: string;
   publicUrl: string;
   thumbnailUrl?: string;
@@ -32,6 +34,8 @@ const fileSchema = new Schema<IFile>(
     mimeType: { type: String },
     size: { type: Number, required: true },
     storageProvider: { type: String, enum: ['imagekit', 'cloudinary'], required: true },
+    providerFileId: { type: String, index: true },
+    providerResourceType: { type: String, enum: ['image', 'video', 'raw'] },
     storagePath: { type: String, required: true },
     publicUrl: { type: String, required: true },
     thumbnailUrl: { type: String },
@@ -50,4 +54,3 @@ fileSchema.index({ userId: 1, fileType: 1, deletedAt: 1 });
 fileSchema.index({ userId: 1, createdAt: -1 });
 
 export const FileModel = model<IFile>('files', fileSchema);
-

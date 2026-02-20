@@ -7,6 +7,7 @@ const schema = z.object({
   USER_SERVICE_URL: z.string().default('http://localhost:3002'),
   PRODUCTIVITY_SERVICE_URL: z.string().default('http://localhost:3006'),
   MESSAGING_SERVICE_URL: z.string().default('http://localhost:3007'),
+  FILE_SERVICE_URL: z.string().default('http://localhost:3008'),
 });
 
 export const env = schema.parse(process.env);

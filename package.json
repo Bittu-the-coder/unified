@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npm run -ws build",
     "dev": "npm run dev -w apps/gateway",
-    "dev:all": "pnpm --parallel --filter @unified/auth-service --filter @unified/user-service --filter @unified/productivity-service --filter @unified/messaging-service --filter @unified/gateway --filter @unified/web dev",
+    "dev:all": "pnpm --parallel --filter @unified/auth-service --filter @unified/user-service --filter @unified/productivity-service --filter @unified/messaging-service --filter @unified/file-service --filter @unified/gateway --filter @unified/web dev",
     "build:all": "pnpm --filter @unified/shared build && pnpm --recursive --filter \"@unified/*\" build",
     "typecheck:all": "pnpm --recursive --filter \"@unified/*\" typecheck",
     "lint": "npm run -ws lint",

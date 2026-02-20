@@ -1,7 +1,26 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { MessageCircle, Plus, Search, Send, Users } from 'lucide-react';
+import {
+  Archive,
+  ArchiveRestore,
+  BellOff,
+  BellRing,
+  MessageCircle,
+  MessageSquareReply,
+  Pin,
+  PinOff,
+  Plus,
+  Search,
+  Send,
+  ShieldPlus,
+  Trash2,
+  UserMinus,
+  UserPlus,
+  Users,
+  X,
+  Pencil,
+} from 'lucide-react';
 import { authTokenStore, messagingApi, userApi, type ChatMessage, type Conversation, type UserProfile } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,7 +32,7 @@ type MessagingWorkspaceProps = {
   onError: (message: string) => void;
 };
 
-const quickReactions = ['like', 'love', 'laugh', 'fire', 'clap'] as const;
+const quickReactions = ['👍', '❤️', '😂', '🔥', '👏'] as const;
 const REALTIME_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3000';
 
 export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspaceProps) {
@@ -397,7 +416,7 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
   };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
+    <div className="grid min-w-0 gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -413,7 +432,7 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
           </div>
           <div className="space-y-2 rounded-xl border border-border p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">New Direct</p>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 placeholder="Participant unique number"
                 value={newDirectParticipantId}
@@ -423,8 +442,9 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <Button size="sm" variant="secondary" onClick={createSelfConversation}>
-              Chat with yourself
+            <Button size="sm" variant="secondary" onClick={createSelfConversation} className="gap-2">
+              <MessageCircle className="h-4 w-4" />
+              Self Chat
             </Button>
           </div>
           <div className="space-y-2 rounded-xl border border-border p-3">
@@ -435,12 +455,12 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
               value={newGroupParticipants}
               onChange={(e) => setNewGroupParticipants(e.target.value)}
             />
-            <Button size="sm" variant="secondary" onClick={createGroupConversation}>
+            <Button size="sm" variant="secondary" onClick={createGroupConversation} className="gap-2">
               <Users className="mr-1 h-4 w-4" />
-              Create Group
+              Group
             </Button>
           </div>
-          <div className="max-h-[480px] space-y-2 overflow-auto">
+          <div className="max-h-[320px] space-y-2 overflow-auto sm:max-h-[420px] lg:max-h-[480px]">
             {filteredConversations.map((conversation) => (
               <button
                 key={conversation._id}
@@ -454,7 +474,10 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                   <p className="font-medium">{getConversationTitle(conversation)}</p>
                   {conversation.memberState?.isPinned ? <span className="text-xs text-accent">Pinned</span> : null}
                 </div>
-                <p className="text-xs text-muted-foreground">{conversation.participantIds.length} participants</p>
+                <p className="text-xs text-muted-foreground">
+                  <span className="sm:hidden">{conversation.participantIds.length}</span>
+                  <span className="hidden sm:inline">{conversation.participantIds.length} participants</span>
+                </p>
               </button>
             ))}
             {!loading && !filteredConversations.length ? <p className="text-sm text-muted-foreground">No conversations.</p> : null}
@@ -466,21 +489,40 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <CardTitle>{selectedConversation ? getConversationTitle(selectedConversation) : 'Select a chat'}</CardTitle>
+              <CardTitle className="break-words">{selectedConversation ? getConversationTitle(selectedConversation) : 'Select a chat'}</CardTitle>
               <CardDescription>
                 {selectedConversation ? `${selectedConversation.type} - ${selectedConversation.participantIds.length} participants` : 'No chat selected'}
               </CardDescription>
             </div>
             {selectedConversation ? (
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => toggleMemberState('mute')}>
-                  {selectedConversation.memberState?.isMuted ? 'Unmute' : 'Mute'}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleMemberState('mute')}
+                  title={selectedConversation.memberState?.isMuted ? 'Unmute' : 'Mute'}
+                >
+                  {selectedConversation.memberState?.isMuted ? <BellRing className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => toggleMemberState('pin')}>
-                  {selectedConversation.memberState?.isPinned ? 'Unpin' : 'Pin'}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleMemberState('pin')}
+                  title={selectedConversation.memberState?.isPinned ? 'Unpin' : 'Pin'}
+                >
+                  {selectedConversation.memberState?.isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => toggleMemberState('archive')}>
-                  {selectedConversation.memberState?.isArchived ? 'Unarchive' : 'Archive'}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => toggleMemberState('archive')}
+                  title={selectedConversation.memberState?.isArchived ? 'Unarchive' : 'Archive'}
+                >
+                  {selectedConversation.memberState?.isArchived ? (
+                    <ArchiveRestore className="h-4 w-4" />
+                  ) : (
+                    <Archive className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             ) : null}
@@ -492,14 +534,14 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
               {selectedConversation.type === 'group' ? (
                 <div className="space-y-2 rounded-xl border border-border p-3">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Group Participants</p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <Input
                       placeholder="Add participant by unique number"
                       value={manageParticipantId}
                       onChange={(e) => setManageParticipantId(e.target.value)}
                     />
-                    <Button size="sm" variant="secondary" onClick={addParticipant}>
-                      Add
+                    <Button size="sm" variant="secondary" onClick={addParticipant} title="Add participant">
+                      <UserPlus className="h-4 w-4" />
                     </Button>
                   </div>
                   <div className="max-h-24 space-y-1 overflow-auto">
@@ -507,12 +549,12 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                       <div key={participantId} className="flex items-center justify-between rounded-lg border border-border px-2 py-1 text-xs">
                         <span>{formatParticipantLabel(participantId)}</span>
                         <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => makeAdmin(participantId)}>
-                            Admin
+                          <Button size="sm" variant="ghost" onClick={() => makeAdmin(participantId)} title="Make admin">
+                            <ShieldPlus className="h-4 w-4" />
                           </Button>
                           {participantId !== currentUserId ? (
-                            <Button size="sm" variant="ghost" onClick={() => removeParticipant(participantId)}>
-                              Remove
+                            <Button size="sm" variant="ghost" onClick={() => removeParticipant(participantId)} title="Remove participant">
+                              <UserMinus className="h-4 w-4" />
                             </Button>
                           ) : null}
                         </div>
@@ -522,7 +564,7 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                 </div>
               ) : null}
 
-              <div className="max-h-[430px] space-y-2 overflow-auto rounded-xl border border-border p-3">
+              <div className="max-h-[340px] space-y-2 overflow-auto rounded-xl border border-border p-3 sm:max-h-[430px]">
                 {messages.map((message) => {
                   const own = message.senderId === currentUserId;
                   const replyTo = message.replyToMessageId ? messages.find((item) => item._id === message.replyToMessageId) : undefined;
@@ -541,8 +583,10 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                             Reply: {replyTo.content}
                           </div>
                         ) : null}
-                        <p>{message.content}</p>
-                        {message.attachments.length ? <p className="mt-1 text-xs opacity-70">Attachment(s): {message.attachments.length}</p> : null}
+                          <p className="break-words">{message.content}</p>
+                        {message.attachments.length ? (
+                          <p className="mt-1 text-xs opacity-70">Attachments: {message.attachments.length}</p>
+                        ) : null}
                         <div className="mt-1 flex flex-wrap gap-1">
                           {quickReactions.map((emoji, index) => {
                             const reaction = message.reactions.find((item) => item.emoji === emoji);
@@ -578,16 +622,17 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                               setReplyToMessageId(message._id);
                               setReplyPreview(message.content);
                             }}
+                            title="Reply"
                           >
-                            Reply
+                            <MessageSquareReply className="h-4 w-4" />
                           </Button>
                           {own ? (
                             <>
-                              <Button size="sm" variant="outline" onClick={() => editMessage(message)}>
-                                Edit
+                              <Button size="sm" variant="outline" onClick={() => editMessage(message)} title="Edit">
+                                <Pencil className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => deleteMessage(message._id)}>
-                                Delete
+                              <Button size="sm" variant="outline" onClick={() => deleteMessage(message._id)} title="Delete">
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </>
                           ) : null}
@@ -607,8 +652,9 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                       setReplyToMessageId(undefined);
                       setReplyPreview('');
                     }}
-                    className="ml-2 underline"
+                    className="ml-2 inline-flex items-center underline"
                   >
+                    <X className="mr-1 h-3.5 w-3.5" />
                     cancel
                   </button>
                 </div>
@@ -622,9 +668,8 @@ export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspac
                   onFocus={() => void setTyping(true)}
                   onBlur={() => void setTyping(false)}
                 />
-                <Button onClick={sendMessage}>
-                  <Send className="mr-1 h-4 w-4" />
-                  Send
+                <Button onClick={sendMessage} title="Send" className="shrink-0">
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
             </>

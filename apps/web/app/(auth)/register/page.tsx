@@ -1,13 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/api';
+import { AuthShell } from '@/components/auth/auth-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -49,10 +48,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-4">
-      <div className="flex justify-end">
-        <ThemeToggle />
-      </div>
+    <AuthShell
+      title="Create your Unified workspace"
+      description="Register once and get immediate access to identity, productivity, messaging, and cloud modules."
+      footerLabel="Already have an account?"
+      footerLinkLabel="Login"
+      footerLinkHref="/login"
+    >
       <Card>
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
@@ -98,15 +100,9 @@ export default function RegisterPage() {
               Create account
             </Button>
           </form>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link className="text-accent underline-offset-4 hover:underline" href="/login">
-              Login
-            </Link>
-          </p>
         </CardContent>
       </Card>
-    </div>
+    </AuthShell>
   );
 }
 

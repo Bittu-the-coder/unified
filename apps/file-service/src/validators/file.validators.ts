@@ -20,6 +20,8 @@ export const createFileSchema = z.object({
   mimeType: z.string().max(100).optional(),
   size: z.coerce.number().int().positive(),
   storageProvider: z.enum(['imagekit', 'cloudinary']),
+  providerFileId: z.string().max(255).optional(),
+  providerResourceType: z.enum(['image', 'video', 'raw']).optional(),
   storagePath: z.string().min(1).max(1200),
   publicUrl: z.string().url(),
   thumbnailUrl: z.string().url().optional(),
@@ -35,7 +37,19 @@ export const createFolderSchema = z.object({
 });
 
 export const updateFolderSchema = z.object({
-  name: z.string().min(1).max(500),
+  name: z.string().min(1).max(500).optional(),
   description: z.string().max(2000).optional(),
+  parentFolderId: z.string().min(1).nullable().optional(),
+}).refine((v) => v.name !== undefined || v.description !== undefined || v.parentFolderId !== undefined, {
+  message: 'At least one field is required',
 });
 
+export const updateFileSchema = z.object({
+  name: z.string().min(1).max(500).optional(),
+  description: z.string().max(2000).optional(),
+  parentFolderId: z.string().min(1).nullable().optional(),
+  isPublic: z.boolean().optional(),
+  isStarred: z.boolean().optional(),
+}).refine((v) => v.name !== undefined || v.description !== undefined || v.parentFolderId !== undefined || v.isPublic !== undefined || v.isStarred !== undefined, {
+  message: 'At least one field is required',
+});
