@@ -255,6 +255,18 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
     }));
   }, [user]);
 
+  useEffect(() => {
+    if (!success) return;
+    const timer = setTimeout(() => setSuccess(''), 3000);
+    return () => clearTimeout(timer);
+  }, [success]);
+
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => setError(''), 5000);
+    return () => clearTimeout(timer);
+  }, [error]);
+
   const addTodo = async () => {
     if (!todoTitle.trim()) return;
     await productivityApi.createTodo({ title: todoTitle });
@@ -738,22 +750,22 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
           <CardDescription>Search users and follow directly.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Input
               placeholder="Search by name, username or email"
               value={userSearchQuery}
               onChange={(e) => setUserSearchQuery(e.target.value)}
             />
-            <Button variant="outline" onClick={searchUsers}>Search</Button>
+            <Button variant="outline" onClick={searchUsers} className="w-full sm:w-auto">Search</Button>
           </div>
           <div className="space-y-2">
             {userSearchResults.map((result) => (
-              <div key={result.authUserId} className="flex items-center justify-between rounded-xl border border-border p-3">
-                <div>
+              <div key={result.authUserId} className="rounded-xl border border-border p-3">
+                <div className="mb-2">
                   <p className="font-medium">{result.fullName}</p>
                   <p className="text-xs text-muted-foreground">@{result.username}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {following.some((u) => u.authUserId === result.authUserId) ? (
                     <Button size="sm" variant="outline" onClick={() => unfollowUser(result.authUserId)}>
                       Unfollow
@@ -800,8 +812,8 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
           </CardHeader>
           <CardContent className="space-y-2">
             {following.map((item) => (
-              <div key={item.authUserId} className="flex items-center justify-between rounded-xl border border-border p-3 text-sm">
-                <div>
+              <div key={item.authUserId} className="rounded-xl border border-border p-3 text-sm">
+                <div className="mb-2">
                   <p className="font-medium">{item.fullName}</p>
                   <p className="text-xs text-muted-foreground">@{item.username}</p>
                 </div>
@@ -817,8 +829,8 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
           </CardHeader>
           <CardContent className="space-y-2">
             {blockedUsers.map((item) => (
-              <div key={item.authUserId} className="flex items-center justify-between rounded-xl border border-border p-3 text-sm">
-                <div>
+              <div key={item.authUserId} className="rounded-xl border border-border p-3 text-sm">
+                <div className="mb-2">
                   <p className="font-medium">{item.fullName}</p>
                   <p className="text-xs text-muted-foreground">@{item.username}</p>
                 </div>
@@ -835,13 +847,13 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
           <CardDescription>Fetch any public user profile by unique user number.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Input
               placeholder="Enter unique user number"
               value={publicProfileId}
               onChange={(e) => setPublicProfileId(e.target.value)}
             />
-            <Button variant="outline" onClick={fetchPublicProfile}>Fetch</Button>
+            <Button variant="outline" onClick={fetchPublicProfile} className="w-full sm:w-auto">Fetch</Button>
           </div>
           {publicProfile && (
             <div className="rounded-xl border border-border p-3">

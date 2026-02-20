@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarPlus, Check, CirclePlay, Clock3, Link2, ListTodo, Pause, Plus, Square, TimerReset, Trash2 } from 'lucide-react';
+import { CalendarPlus, Check, CirclePlay, Clock3, Link2, ListTodo, Pause, Plus, Square, Target, TimerReset, Trash2 } from 'lucide-react';
 import { productivityApi, type PomodoroSession, type ProgressRecord, type TaskCategory, type TaskDependency, type TimeEntry, type Todo } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
