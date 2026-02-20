@@ -45,11 +45,11 @@ Do not use `Express` preset for backend projects.
 
 Use this in all 7 projects:
 
-`pnpm install --no-frozen-lockfile`
+`pnpm -w install --no-frozen-lockfile`
 
 ### Final install command (after lockfile is clean)
 
-`pnpm install --frozen-lockfile`
+`pnpm -w install --frozen-lockfile`
 
 ### Build commands per project
 
@@ -184,7 +184,7 @@ When local machine is ready:
 ## 8. Error -> Fix Mapping
 
 1. `ERR_PNPM_OUTDATED_LOCKFILE`
-Set install command to `pnpm install --no-frozen-lockfile` temporarily.
+Set install command to `pnpm -w install --no-frozen-lockfile` temporarily.
 
 2. `Cannot find module '@unified/shared'`
 Root directory or include-outside-root setting is wrong, or stale project override is active.
@@ -198,6 +198,11 @@ Service boot failed due to missing env variables or invalid production values.
 5. Web build trying to compile backend apps
 Web build command is wrong or overridden; must be only:
 `pnpm -w --filter @unified/web build`
+
+6. Build command not respected / strange parsing
+Make sure commands use normal hyphen `-` not long dash `—`.
+If project shell has issues with chaining, use:
+`cmd /c "pnpm -w --filter @unified/shared build && pnpm -w --filter @unified/auth-service build"`
 
 ## 9. Notes
 
