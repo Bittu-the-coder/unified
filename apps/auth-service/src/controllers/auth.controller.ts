@@ -1,15 +1,15 @@
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { ok } from '@unified/shared';
 import { AuthService } from '../services/auth.service';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
 
 export class AuthController {
-  static async register(req: Request, res: Response) {
+  static async register(req: any, res: Response) {
     const user = await AuthService.register(req.body);
     return ok(res, user, 'User registered', 201);
   }
 
-  static async login(req: Request, res: Response) {
+  static async login(req: any, res: Response) {
     const session = await AuthService.login({
       ...req.body,
       ipAddress: req.ip,
@@ -18,12 +18,12 @@ export class AuthController {
     return ok(res, session, 'Login successful');
   }
 
-  static async refresh(req: Request, res: Response) {
+  static async refresh(req: any, res: Response) {
     const tokens = await AuthService.refresh(req.body.refreshToken);
     return ok(res, tokens, 'Token refreshed');
   }
 
-  static async logout(req: Request, res: Response) {
+  static async logout(req: any, res: Response) {
     await AuthService.logout(req.body.refreshToken);
     return ok(res, null, 'Logged out');
   }
@@ -48,17 +48,17 @@ export class AuthController {
     return ok(res, null, 'Password changed');
   }
 
-  static async forgotPassword(req: Request, res: Response) {
+  static async forgotPassword(req: any, res: Response) {
     const data = await AuthService.forgotPassword(req.body.email);
     return ok(res, data, 'If the account exists, a reset token has been issued');
   }
 
-  static async resetPassword(req: Request, res: Response) {
+  static async resetPassword(req: any, res: Response) {
     await AuthService.resetPassword(req.body.resetToken, req.body.newPassword);
     return ok(res, null, 'Password reset successful');
   }
 
-  static async checkAvailability(req: Request, res: Response) {
+  static async checkAvailability(req: any, res: Response) {
     const data = await AuthService.checkAvailability(req.body);
     return ok(res, data, 'Availability checked');
   }
