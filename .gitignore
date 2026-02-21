@@ -7,3 +7,6 @@ coverage
 tmp_docx_extract
 plan_clean.txt
 plan_lines.txt
+
+.vercel
+.env*.local
