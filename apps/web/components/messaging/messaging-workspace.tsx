@@ -33,7 +33,11 @@ type MessagingWorkspaceProps = {
 };
 
 const quickReactions = ['\u{1F44D}', '\u{2764}\u{FE0F}', '\u{1F602}', '\u{1F525}', '\u{1F44F}'] as const;
-const REALTIME_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3000';
+const REALTIME_BASE =
+  process.env.NEXT_PUBLIC_API_BASE?.trim() ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3000'
+    : 'https://gateway-dun-chi.vercel.app');
 
 export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspaceProps) {
   const [loading, setLoading] = useState(true);
