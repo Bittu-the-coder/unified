@@ -10,7 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@unified/shared": "file:../../packages/shared",
+    "@unified/shared": "file:./shared",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "express-async-errors": "^3.1.1",
