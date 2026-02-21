@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { sharedConfig } from './config';
+import { getSharedConfig } from './config';
 import { UnauthorizedError } from './errors';
 
 export type AccessTokenPayload = {
@@ -10,22 +10,19 @@ export type AccessTokenPayload = {
   fullName?: string;
 };
 
-const accessTokenTtl = sharedConfig.ACCESS_TOKEN_TTL as jwt.SignOptions['expiresIn'];
-const refreshTokenTtl = sharedConfig.REFRESH_TOKEN_TTL as jwt.SignOptions['expiresIn'];
-
 export const signAccessToken = (payload: AccessTokenPayload): string =>
-  jwt.sign(payload, sharedConfig.JWT_ACCESS_SECRET, {
-    expiresIn: accessTokenTtl,
+  jwt.sign(payload, getSharedConfig().JWT_ACCESS_SECRET, {
+    expiresIn: getSharedConfig().ACCESS_TOKEN_TTL as jwt.SignOptions['expiresIn'],
   });
 
 export const signRefreshToken = (payload: AccessTokenPayload): string =>
-  jwt.sign(payload, sharedConfig.JWT_REFRESH_SECRET, {
-    expiresIn: refreshTokenTtl,
+  jwt.sign(payload, getSharedConfig().JWT_REFRESH_SECRET, {
+    expiresIn: getSharedConfig().REFRESH_TOKEN_TTL as jwt.SignOptions['expiresIn'],
   });
 
 export const verifyAccessToken = (token: string): AccessTokenPayload => {
   try {
-    return jwt.verify(token, sharedConfig.JWT_ACCESS_SECRET) as AccessTokenPayload;
+    return jwt.verify(token, getSharedConfig().JWT_ACCESS_SECRET) as AccessTokenPayload;
   } catch {
     throw new UnauthorizedError('Invalid access token');
   }
@@ -33,7 +30,7 @@ export const verifyAccessToken = (token: string): AccessTokenPayload => {
 
 export const verifyRefreshToken = (token: string): AccessTokenPayload => {
   try {
-    return jwt.verify(token, sharedConfig.JWT_REFRESH_SECRET) as AccessTokenPayload;
+    return jwt.verify(token, getSharedConfig().JWT_REFRESH_SECRET) as AccessTokenPayload;
   } catch {
     throw new UnauthorizedError('Invalid refresh token');
   }
