@@ -7,6 +7,17 @@ const appHandler = app as unknown as (req: unknown, res: unknown) => unknown;
 const mongoUri = env.MONGODB_URI;
 
 const ensureMongo = async () => {
+  if (process.env.NODE_ENV === 'production') {
+    const rawMongoUri = process.env.MONGODB_URI;
+    const rawClientOrigin = process.env.CLIENT_ORIGIN;
+    if (!rawMongoUri || rawMongoUri.includes('localhost')) {
+      throw new Error('auth-service runtime config error: set MONGODB_URI to a remote DB in Production env vars');
+    }
+    if (!rawClientOrigin) {
+      throw new Error('auth-service runtime config error: set CLIENT_ORIGIN in Production env vars');
+    }
+  }
+
   if (mongoose.connection.readyState === 1) {
     return;
   }
