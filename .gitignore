@@ -18,3 +18,5 @@ apps/web/.env._prodcheck
 apps/web/.env._webverify
 _tmp_*
 apps/**/.env._*
+!apps/*/shared/dist/
+!apps/*/shared/dist/**
