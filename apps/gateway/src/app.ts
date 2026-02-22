@@ -1,5 +1,5 @@
 import cors from 'cors';
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { env } from './config';
 
@@ -18,16 +18,17 @@ app.use(
   }),
 );
 
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', service: 'gateway' });
 });
 
 const buildProxy = (target: string, prefix: string) =>
+  // Cast for compatibility with differing http-proxy-middleware type packages across environments.
   createProxyMiddleware({
     target,
     changeOrigin: true,
-    pathRewrite: (path) => `${prefix}${path}`,
-  });
+    pathRewrite: (path: string) => `${prefix}${path}`,
+  } as any);
 
 app.use(
   '/auth',

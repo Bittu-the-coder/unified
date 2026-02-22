@@ -28,8 +28,8 @@ importers:
   apps/auth-service:
     dependencies:
       '@unified/shared':
-        specifier: file:../../packages/shared
-        version: link:../../packages/shared
+        specifier: file:./shared
+        version: link:./shared
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -68,8 +68,8 @@ importers:
   apps/file-service:
     dependencies:
       '@unified/shared':
-        specifier: file:../../packages/shared
-        version: link:../../packages/shared
+        specifier: file:./shared
+        version: link:./shared
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -102,8 +102,8 @@ importers:
   apps/gateway:
     dependencies:
       '@unified/shared':
-        specifier: file:../../packages/shared
-        version: link:../../packages/shared
+        specifier: file:./shared
+        version: link:./shared
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -133,8 +133,8 @@ importers:
   apps/messaging-service:
     dependencies:
       '@unified/shared':
-        specifier: file:../../packages/shared
-        version: link:../../packages/shared
+        specifier: file:./shared
+        version: link:./shared
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -167,8 +167,8 @@ importers:
   apps/productivity-service:
     dependencies:
       '@unified/shared':
-        specifier: file:../../packages/shared
-        version: link:../../packages/shared
+        specifier: file:./shared
+        version: link:./shared
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -201,8 +201,8 @@ importers:
   apps/user-service:
     dependencies:
       '@unified/shared':
-        specifier: file:../../packages/shared
-        version: link:../../packages/shared
+        specifier: file:./shared
+        version: link:./shared
       cors:
         specifier: ^2.8.5
         version: 2.8.6

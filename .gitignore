@@ -16,3 +16,5 @@ apps/gateway/.env._prodcheck
 apps/gateway/.env._verify
 apps/web/.env._prodcheck
 apps/web/.env._webverify
+_tmp_*
+apps/**/.env._*
