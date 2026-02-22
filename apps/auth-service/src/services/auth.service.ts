@@ -7,7 +7,7 @@ import {
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
-} from '@unified/shared';
+} from '../../shared/dist/index';
 import { PasswordResetTokenModel } from '../models/PasswordResetToken.model';
 import { SessionModel } from '../models/Session.model';
 import { UserDeviceModel } from '../models/UserDevice.model';
@@ -334,3 +334,4 @@ export class AuthService {
     return sanitizeUser(user);
   }
 }
+

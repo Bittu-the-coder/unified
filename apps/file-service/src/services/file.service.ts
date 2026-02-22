@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { BadRequestError, NotFoundError } from '@unified/shared';
+import { BadRequestError, NotFoundError } from '../../shared/dist/index';
 import { env } from '../config/env';
 import { FileModel } from '../models/File.model';
 import { FolderModel } from '../models/Folder.model';
@@ -520,3 +520,4 @@ export class FileService {
     };
   }
 }
+

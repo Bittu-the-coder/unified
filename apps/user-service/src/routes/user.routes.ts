@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth, validateBody, validateQuery } from '@unified/shared';
+import { requireAuth, validateBody, validateQuery } from '../../shared/dist/index';
 import { UserController } from '../controllers/user.controller';
 import { searchUsersSchema, updateProfileSchema } from '../validators/user.validators';
 
@@ -18,3 +18,4 @@ userRouter.delete('/:id/follow', requireAuth, UserController.unfollow);
 userRouter.post('/:id/block', requireAuth, UserController.block);
 userRouter.delete('/:id/block', requireAuth, UserController.unblock);
 userRouter.get('/:id', UserController.getById);
+

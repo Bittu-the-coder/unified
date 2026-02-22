@@ -1,7 +1,7 @@
 import 'express-async-errors';
 import cors from 'cors';
 import express from 'express';
-import { errorHandler } from '@unified/shared';
+import { errorHandler } from '../shared/dist/index';
 import { env } from './config/env';
 import { fileRouter } from './routes/file.routes';
 
@@ -27,4 +27,5 @@ app.get('/health', (_req, res) => {
 
 app.use('/file-cloud', fileRouter);
 app.use(errorHandler);
+
 

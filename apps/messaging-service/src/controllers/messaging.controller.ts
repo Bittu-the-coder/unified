@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { ok, type AuthenticatedRequest } from '@unified/shared';
+import { ok, type AuthenticatedRequest } from '../../shared/dist/index';
 import { MessagingService } from '../services/messaging.service';
 import { subscribeMessagingEvents } from '../realtime/event-bus';
 
@@ -135,3 +135,4 @@ export class MessagingController {
     return ok(res, data, 'Reaction removed');
   }
 }
+

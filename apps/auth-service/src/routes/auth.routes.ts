@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { validateBody } from '@unified/shared';
+import { validateBody } from '../../shared/dist/index';
 import { AuthController } from '../controllers/auth.controller';
 import { requireAuth } from '../middleware/auth.middleware';
 import {
@@ -26,3 +26,4 @@ authRouter.get('/sessions', requireAuth, AuthController.sessions);
 authRouter.delete('/sessions/:sessionId', requireAuth, AuthController.revokeSession);
 authRouter.post('/logout-all', requireAuth, AuthController.logoutAll);
 authRouter.post('/change-password', requireAuth, validateBody(changePasswordSchema), AuthController.changePassword);
+

@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { UnauthorizedError, verifyAccessToken } from '@unified/shared';
+import { UnauthorizedError, verifyAccessToken } from '../../shared/dist/index';
 
 export type AuthenticatedRequest = any & {
   user?: { id: string; email: string; uniqueNumber?: string; username?: string; fullName?: string };
@@ -22,3 +22,4 @@ export const requireAuth = (req: AuthenticatedRequest, _res: Response, next: (er
   };
   next();
 };
+

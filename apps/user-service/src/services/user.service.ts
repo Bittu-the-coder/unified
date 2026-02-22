@@ -1,4 +1,4 @@
-import { BadRequestError, NotFoundError } from '@unified/shared';
+import { BadRequestError, NotFoundError } from '../../shared/dist/index';
 import { UserBlockModel } from '../models/UserBlock.model';
 import { UserFollowModel } from '../models/UserFollow.model';
 import { UserProfileModel } from '../models/UserProfile.model';
@@ -255,3 +255,4 @@ export class UserService {
     return { followers, following, blocked };
   }
 }
+

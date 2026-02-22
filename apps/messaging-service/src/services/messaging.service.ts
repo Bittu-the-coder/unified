@@ -1,4 +1,4 @@
-import { BadRequestError, NotFoundError } from '@unified/shared';
+import { BadRequestError, NotFoundError } from '../../shared/dist/index';
 import { ConversationMemberStateModel } from '../models/ConversationMemberState.model';
 import { ConversationModel, type IConversation } from '../models/Conversation.model';
 import { MessageModel } from '../models/Message.model';
@@ -455,3 +455,4 @@ export class MessagingService {
     return message;
   }
 }
+

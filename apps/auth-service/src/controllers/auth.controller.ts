@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { ok } from '@unified/shared';
+import { ok } from '../../shared/dist/index';
 import { AuthService } from '../services/auth.service';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
 
@@ -68,3 +68,4 @@ export class AuthController {
     return ok(res, me, 'Profile fetched');
   }
 }
+

@@ -1,4 +1,4 @@
-import { NotFoundError } from '@unified/shared';
+import { NotFoundError } from '../../shared/dist/index';
 import { CalendarEventModel } from '../models/CalendarEvent.model';
 import { FocusGoalModel } from '../models/FocusGoal.model';
 import { NoteModel } from '../models/Note.model';
@@ -437,3 +437,4 @@ export class TodoService {
     await FocusGoalModel.deleteOne({ _id: id, userId });
   }
 }
+

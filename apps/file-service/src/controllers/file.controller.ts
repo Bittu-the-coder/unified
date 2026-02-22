@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { ok, type AuthenticatedRequest } from '@unified/shared';
+import { ok, type AuthenticatedRequest } from '../../shared/dist/index';
 import { FileService } from '../services/file.service';
 
 export class FileController {
@@ -65,3 +65,4 @@ export class FileController {
     return ok(res, null, 'Folder deleted');
   }
 }
+

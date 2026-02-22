@@ -1,7 +1,7 @@
 import 'express-async-errors';
 import cors from 'cors';
 import express from 'express';
-import { errorHandler } from '@unified/shared';
+import { errorHandler } from '../shared/dist/index';
 import { env } from './config/env';
 import { userRouter } from './routes/user.routes';
 
@@ -27,3 +27,4 @@ app.get('/health', (_req, res) => {
 
 app.use('/users', userRouter);
 app.use(errorHandler);
+

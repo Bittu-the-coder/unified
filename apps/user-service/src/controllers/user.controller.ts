@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { ok, type AuthenticatedRequest } from '@unified/shared';
+import { ok, type AuthenticatedRequest } from '../../shared/dist/index';
 import { UserService } from '../services/user.service';
 
 export class UserController {
@@ -89,3 +89,4 @@ export class UserController {
     return ok(res, data, 'User stats fetched');
   }
 }
+

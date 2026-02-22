@@ -1,5 +1,5 @@
 import cors from 'cors';
-import express, { type Request, type Response } from 'express';
+import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { env } from './config';
 
@@ -18,7 +18,7 @@ app.use(
   }),
 );
 
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/health', (_req: any, res: any) => {
   res.json({ status: 'ok', service: 'gateway' });
 });
 

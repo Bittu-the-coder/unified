@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { logger } from '@unified/shared';
+import { logger } from '../shared/dist/index';
 import { app } from './app';
 import { env } from './config/env';
 
@@ -14,4 +14,5 @@ bootstrap().catch((err) => {
   logger.error({ err }, 'file-service failed to start');
   process.exit(1);
 });
+
 

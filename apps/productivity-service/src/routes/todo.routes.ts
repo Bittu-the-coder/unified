@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth, validateBody } from '@unified/shared';
+import { requireAuth, validateBody } from '../../shared/dist/index';
 import { TodoController } from '../controllers/todo.controller';
 import {
   completePomodoroSchema,
@@ -72,3 +72,4 @@ todoRouter.get('/focus-goals', TodoController.listFocusGoals);
 todoRouter.post('/focus-goals', validateBody(createFocusGoalSchema), TodoController.createFocusGoal);
 todoRouter.patch('/focus-goals/:id', validateBody(updateFocusGoalSchema), TodoController.updateFocusGoal);
 todoRouter.delete('/focus-goals/:id', TodoController.removeFocusGoal);
+

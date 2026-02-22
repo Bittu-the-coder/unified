@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth, validateBody, validateQuery } from '@unified/shared';
+import { requireAuth, validateBody, validateQuery } from '../../shared/dist/index';
 import { FileController } from '../controllers/file.controller';
 import {
   createFileSchema,
@@ -26,3 +26,4 @@ fileRouter.get('/folders/:id', FileController.getFolder);
 fileRouter.post('/folders', validateBody(createFolderSchema), FileController.createFolder);
 fileRouter.patch('/folders/:id', validateBody(updateFolderSchema), FileController.updateFolder);
 fileRouter.delete('/folders/:id', FileController.deleteFolder);
+

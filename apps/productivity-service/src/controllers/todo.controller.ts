@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import { ok, type AuthenticatedRequest } from '@unified/shared';
+import { ok, type AuthenticatedRequest } from '../../shared/dist/index';
 import { TodoService } from '../services/todo.service';
 
 export class TodoController {
@@ -199,3 +199,4 @@ export class TodoController {
     return ok(res, null, 'Focus goal deleted');
   }
 }
+

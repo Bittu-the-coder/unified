@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth, validateBody } from '@unified/shared';
+import { requireAuth, validateBody } from '../../shared/dist/index';
 import { MessagingController } from '../controllers/messaging.controller';
 import {
   createDirectConversationSchema,
@@ -40,3 +40,4 @@ messagingRouter.patch('/messages/:id', validateBody(updateMessageSchema), Messag
 messagingRouter.delete('/messages/:id', MessagingController.deleteMessage);
 messagingRouter.post('/messages/:id/reactions', validateBody(reactionSchema), MessagingController.addReaction);
 messagingRouter.delete('/messages/:id/reactions/:emoji', MessagingController.removeReaction);
+
