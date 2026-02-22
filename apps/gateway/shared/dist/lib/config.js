@@ -11,8 +11,8 @@ const schema = zod_1.z.object({
     NODE_ENV: zod_1.z.enum(['development', 'test', 'production']).default('development'),
     JWT_ACCESS_SECRET: zod_1.z.string().default('dev_access_secret'),
     JWT_REFRESH_SECRET: zod_1.z.string().default('dev_refresh_secret'),
-    ACCESS_TOKEN_TTL: zod_1.z.string().default('15m'),
-    REFRESH_TOKEN_TTL: zod_1.z.string().default('7d'),
+    ACCESS_TOKEN_TTL: zod_1.z.string().default('7d'),
+    REFRESH_TOKEN_TTL: zod_1.z.string().default('30d'),
 });
 const getSharedConfig = () => {
     const normalizedEnv = {

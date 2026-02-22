@@ -1,14 +1,14 @@
 import {
-  Bell,
-  Bot,
-  Cloud,
-  LayoutDashboard,
-  MessageCircleMore,
-  ShieldCheck,
-  Sparkles,
-  Target,
-  Users,
-  Workflow,
+    Bell,
+    Bot,
+    Cloud,
+    LayoutDashboard,
+    MessageCircleMore,
+    ShieldCheck,
+    Sparkles,
+    Target,
+    Users,
+    Workflow,
 } from 'lucide-react';
 
 export const highlightMetrics = [
@@ -42,12 +42,12 @@ export const coreFeatures = [
 ];
 
 export const serviceTiles = [
-  { title: 'Dashboard', icon: LayoutDashboard, accent: 'from-[#FF6500] to-[#1E3E62]' },
-  { title: 'Auth + User', icon: Users, accent: 'from-[#255F38] to-[#1F7D53]' },
-  { title: 'Messaging', icon: MessageCircleMore, accent: 'from-[#1E3E62] to-[#0B192C]' },
-  { title: 'Productivity', icon: Workflow, accent: 'from-[#27391C] to-[#255F38]' },
-  { title: 'File Cloud', icon: Cloud, accent: 'from-[#FF6500] to-[#27391C]' },
-  { title: 'Notifications', icon: Bell, accent: 'from-[#0B192C] to-[#1E3E62]' },
-  { title: 'AI Assistant', icon: Bot, accent: 'from-[#27391C] to-[#1F7D53]' },
-  { title: 'Extensible Platform', icon: Sparkles, accent: 'from-[#1E3E62] to-[#255F38]' },
+  { title: 'Dashboard', icon: LayoutDashboard, accent: 'bg-accent' },
+  { title: 'Auth + User', icon: Users, accent: 'bg-secondary' },
+  { title: 'Messaging', icon: MessageCircleMore, accent: 'bg-primary' },
+  { title: 'Productivity', icon: Workflow, accent: 'bg-secondary' },
+  { title: 'File Cloud', icon: Cloud, accent: 'bg-accent' },
+  { title: 'Notifications', icon: Bell, accent: 'bg-primary' },
+  { title: 'AI Assistant', icon: Bot, accent: 'bg-secondary' },
+  { title: 'Extensible Platform', icon: Sparkles, accent: 'bg-primary' },
 ];

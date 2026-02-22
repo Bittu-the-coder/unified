@@ -1,6 +1,5 @@
 ﻿'use client';
 
-import Link from 'next/link';
 import { FileCloudWorkspace } from '@/components/file-cloud/file-cloud-workspace';
 import { MessagingWorkspace } from '@/components/messaging/messaging-workspace';
 import { ProductivityWorkspace } from '@/components/productivity/productivity-workspace';
@@ -9,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
   authApi,
   messagingApi,
@@ -32,9 +30,11 @@ import {
   type UserProfile,
 } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { comingSoonCopy, serviceMenu, type ServiceKey } from './config';
-import { useEffect, useMemo, useState } from 'react';
 import { LogOut } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { comingSoonCopy, serviceMenu, type ServiceKey } from './config';
+import { FontSwitcher } from './font-switcher';
 
 const isServiceKey = (value: string): value is ServiceKey => {
   return serviceMenu.some((item) => item.key === value);
@@ -916,56 +916,141 @@ export function WorkspaceDashboard({ section = 'overview' }: { section?: string 
   };
 
   return (
-    <div className="grid min-h-[calc(100vh-4rem)] gap-4 lg:grid-cols-[290px_minmax(0,1fr)]">
-      <aside className="h-fit rounded-2xl border border-border bg-surface/90 p-4 backdrop-blur lg:sticky lg:top-4">
-        <div className="mb-4 space-y-1">
-          <h1 className="text-xl font-bold">Unified Workspace</h1>
-          <p className="text-sm text-muted-foreground">All services in one premium interface.</p>
+    <div className="flex min-h-screen w-full bg-background font-sans text-foreground selection:bg-primary/20">
+      {/* Sidebar Desktop */}
+      <aside className="fixed inset-y-4 left-4 z-20 hidden w-[260px] flex-col border border-border/50 bg-surface/95 backdrop-blur-2xl transition-all lg:flex shadow-2xl shadow-primary/5 rounded-[24px] py-4">
+        <div className="flex h-[72px] shrink-0 items-center px-6 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm border border-border">
+              <img src="/icon.svg" alt="Unified" className="h-5 w-5" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-foreground">Unified</span>
+          </div>
         </div>
-        <div className="mb-4 flex flex-wrap gap-2">
-          <ThemeToggle />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={async () => {
-              await authApi.logout();
-              window.location.href = '/login';
-            }}
-            className="gap-2"
-            title="Logout"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Logout</span>
-          </Button>
-        </div>
-        <nav className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 lg:mx-0 lg:block lg:space-y-1 lg:overflow-visible lg:px-0 lg:pb-0">
-          {serviceMenu.map((item) => (
-            <Link
-              key={item.key}
-              href={`/dashboard/${item.key}`}
-              className={cn(
-                'flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition lg:w-full',
-                selected === item.key ? 'bg-primary text-white' : 'text-foreground hover:bg-muted',
-              )}
-              title={item.title}
-            >
-              <item.icon className="h-4 w-4" />
-              <span className="hidden sm:inline lg:inline">{item.title}</span>
-            </Link>
-          ))}
+        <nav className="flex flex-1 flex-col gap-1.5 px-4 overflow-y-auto scrollbar-hide">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-2">Workspace Services</p>
+          {serviceMenu.map((item) => {
+            const isActive = selected === item.key;
+            return (
+              <Link
+                key={item.key}
+                href={`/dashboard/${item.key}`}
+                title={item.title}
+                className={cn(
+                  'group relative flex items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition-all duration-300 outline-none',
+                  isActive ? 'bg-primary/10 text-primary shadow-sm' : 'text-muted-foreground hover:bg-surface border border-transparent hover:text-foreground hover:shadow-sm',
+                )}
+              >
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -mt-3.5 h-7 w-1 rounded-r-full bg-primary" />
+                )}
+                <div className={cn("p-1.5 rounded-lg transition-colors border", isActive ? "bg-primary/20 border-primary/30" : "bg-transparent border-transparent group-hover:bg-muted/50 group-hover:border-border/50")}>
+                  <item.icon className={cn('h-4 w-4 transition-transform duration-300', isActive ? 'scale-110 text-accent' : 'scale-100 group-hover:scale-110')} />
+                </div>
+                {item.title}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
-      <section className="space-y-4 min-w-0">
-        {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600">{error}</p>}
-        {success && <p className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">{success}</p>}
-        {renderMain()}
-      </section>
+
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col lg:pl-[292px] w-full min-w-0">
+        {/* Top bar */}
+        <header className="sticky top-4 z-30 mx-3 lg:mx-6 flex h-[72px] shrink-0 items-center justify-between border border-border/50 bg-surface/95 px-4 backdrop-blur-2xl md:px-6 shadow-sm transition-all rounded-[24px] mb-6">
+          <div className="flex items-center lg:hidden flex-1">
+             <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-sm">
+                <img src="/icon.svg" alt="Unified" className="h-5 w-5" />
+              </div>
+              <span className="text-lg font-bold tracking-tight text-foreground">Unified</span>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center flex-1">
+             <h2 className="text-xl font-bold text-foreground capitalize flex items-center gap-3 animate-fade-in">
+                {serviceMenu.find(s => s.key === selected)?.icon && (
+                  <div className="p-2.5 bg-accent/10 border border-accent/20 rounded-xl shadow-inner">
+                   {(() => { const Icon = serviceMenu.find(s => s.key === selected)?.icon as any; return <Icon className="h-5 w-5 text-accent"/> })()}
+                  </div>
+                )}
+                <span className="text-foreground">
+                  {serviceMenu.find(s => s.key === selected)?.title || 'Overview'}
+                </span>
+             </h2>
+          </div>
+
+          <div className="flex items-center gap-3 sm:gap-4">
+            <FontSwitcher />
+            <ThemeToggle />
+
+            <div className="h-8 w-[1px] bg-border/60 hidden sm:block"></div>
+
+            <div className="flex items-center gap-3 bg-surface hover:bg-muted/60 transition-colors border border-border/60 rounded-full pl-1.5 pr-4 py-1.5 cursor-pointer shadow-sm group">
+               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-white font-bold text-xs shadow-inner shadow-black/20 group-hover:scale-105 transition-transform">
+                  {profileForm.fullName ? profileForm.fullName.charAt(0).toUpperCase() : 'U'}
+               </div>
+               <div className="hidden xl:flex flex-col">
+                 <span className="text-sm font-bold leading-none">{profileForm.fullName || 'User'}</span>
+                 <span className="text-[10px] font-medium text-muted-foreground mt-1 leading-none uppercase tracking-wider">@{profileForm.username || 'username'}</span>
+               </div>
+            </div>
+
+            <div className="h-8 w-[1px] bg-border/60 hidden sm:block"></div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={async () => {
+                await authApi.logout();
+                window.location.href = '/login';
+              }}
+              className="h-10 w-10 shrink-0 border-border/60 rounded-full text-muted-foreground hover:text-white hover:bg-destructive hover:border-destructive transition-all shadow-sm"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        </header>
+
+        {/* Mobile App Bottom Tab Bar */}
+        <div className="lg:hidden fixed bottom-4 inset-x-4 z-50 rounded-[28px] border border-border/50 bg-surface/95 backdrop-blur-2xl shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.2)] dark:shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.7)] px-2 py-2 flex items-center justify-around overflow-x-auto scrollbar-hide">
+          {serviceMenu.map((item) => {
+            const isActive = selected === item.key;
+            return (
+              <Link
+                key={item.key}
+                href={`/dashboard/${item.key}`}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-1 min-w-[64px] rounded-2xl p-2 transition-all duration-300',
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <div className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-xl transition-all',
+                  isActive ? 'bg-primary/10 shadow-sm' : 'bg-transparent'
+                )}>
+                  <item.icon className={cn("h-5 w-5 transition-transform", isActive ? "scale-110 text-primary font-bold" : "scale-100")} />
+                </div>
+                <span className={cn("text-[10px] font-semibold tracking-tight transition-all", isActive ? "opacity-100" : "opacity-70")}>
+                  {item.title.split(' ')[0]}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Main Area */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 lg:pb-8 lg:pt-0 animate-fade-in fill-mode-both duration-500 min-w-0 pb-32 overflow-x-hidden">
+          <div className="mx-auto max-w-[1400px]">
+            {error && <div className="mb-6 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive shadow-sm animate-fade-in flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-destructive animate-pulse"/>{error}</div>}
+            {success && <div className="mb-6 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm font-medium text-emerald-600 dark:text-emerald-400 shadow-sm animate-fade-in flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"/>{success}</div>}
+            <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              {renderMain()}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
-
-
-
-
-
-

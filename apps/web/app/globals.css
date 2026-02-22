@@ -2,53 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #f3f6fb;
-  --foreground: #0b192c;
-  --surface: #ffffff;
-  --muted: #eef2f7;
-  --muted-foreground: #4f5e73;
-  --border: #d9e2ee;
-  --ring: #ff6500;
-  --primary: #1e3e62;
-  --accent: #ff6500;
-  --secondary: #1f7d53;
+@layer base {
+  :root {
+    --background: 243 246 251;
+    --foreground: 11 25 44;
+    --surface: 255 255 255;
+    --muted: 238 242 247;
+    --muted-foreground: 79 94 115;
+    --border: 217 226 238;
+    --ring: 255 101 0;
+    --primary: 30 62 98;
+    --accent: 255 101 0;
+    --secondary: 31 125 83;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 0 0 0;
+    --foreground: 242 246 251;
+    --surface: 11 25 44;
+    --muted: 30 62 98;
+    --muted-foreground: 155 176 201;
+    --border: 30 62 98;
+    --ring: 255 101 0;
+    --primary: 37 95 56;
+    --accent: 255 101 0;
+    --secondary: 31 125 83;
+  }
 }
 
-.dark {
-  --background: #000000;
-  --foreground: #f2f6fb;
-  --surface: #0b192c;
-  --muted: #1e3e62;
-  --muted-foreground: #9bb0c9;
-  --border: #1e3e62;
-  --ring: #ff6500;
-  --primary: #255f38;
-  --accent: #ff6500;
-  --secondary: #1f7d53;
+@layer base {
+  body {
+    --font-primary: var(--font-inter);
+  }
+  body[data-font="inter"] { --font-primary: var(--font-inter); }
+  body[data-font="roboto"] { --font-primary: var(--font-roboto); }
+  body[data-font="dm-sans"] { --font-primary: var(--font-dm-sans); }
+  body[data-font="plus-jakarta"] { --font-primary: var(--font-plus-jakarta); }
+  body[data-font="outfit"] { --font-primary: var(--font-outfit); }
+  body[data-font="raleway"] { --font-primary: var(--font-raleway); }
+
+  body {
+    font-family: var(--font-primary), system-ui, sans-serif;
+    background: rgb(var(--background));
+    color: rgb(var(--foreground));
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  * {
+    border-color: rgb(var(--border));
+    min-width: 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
 }
 
-body {
-  font-family: var(--font-manrope), system-ui, sans-serif;
-  background:
-    radial-gradient(circle at 10% 10%, rgb(255 101 0 / 16%), transparent 24%),
-    radial-gradient(circle at 80% 20%, rgb(39 57 28 / 22%), transparent 28%),
-    radial-gradient(circle at 50% 100%, rgb(30 62 98 / 18%), transparent 35%),
-    var(--background);
-  color: var(--foreground);
-  font-feature-settings: 'rlig' 1, 'calt' 1;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+@layer utilities {
+  .glass {
+    @apply bg-surface/60 backdrop-blur-lg border border-border/50;
+  }
+
+  .glass-card {
+    @apply bg-surface/70 backdrop-blur-xl border border-border/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  }
+
+  .glass-panel {
+    @apply bg-background/50 backdrop-blur-2xl border border-white/10 dark:border-white/5;
+  }
+
+  .text-gradient {
+    @apply text-accent dark:text-white font-bold;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 }
 
-* {
-  border-color: var(--border);
-  min-width: 0;
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-space-grotesk), var(--font-manrope), system-ui, sans-serif;
-  letter-spacing: -0.02em;
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 101, 0, 0.4); }
+  50% { opacity: 0.85; transform: scale(1.02); box-shadow: 0 0 20px 0 rgba(255, 101, 0, 0.2); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--muted-foreground));
 }
