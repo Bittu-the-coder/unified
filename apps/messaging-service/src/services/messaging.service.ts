@@ -1,6 +1,6 @@
 import { BadRequestError, NotFoundError } from '../../shared/dist/index';
+import { ConversationModel } from '../models/Conversation.model';
 import { ConversationMemberStateModel } from '../models/ConversationMemberState.model';
-import { ConversationModel, type IConversation } from '../models/Conversation.model';
 import { MessageModel } from '../models/Message.model';
 import { emitMessagingEvent } from '../realtime/event-bus';
 
@@ -386,11 +386,21 @@ export class MessagingService {
 
     message.isDeleted = true;
     message.deletedAt = new Date();
-    message.content = 'This message was deleted';
-    message.attachments = [];
     await message.save();
-    const conversation = await ConversationModel.findById(message.conversationId).select('participantIds');
+
+    const conversation = await ConversationModel.findById(message.conversationId);
     if (conversation) {
+      if (conversation.lastMessageId?.toString() === message.id) {
+        const previousMessage = await MessageModel.findOne({
+          conversationId: message.conversationId,
+          isDeleted: false,
+        }).sort({ createdAt: -1 });
+
+        conversation.lastMessageId = previousMessage ? previousMessage.id : undefined;
+        conversation.lastMessageAt = previousMessage ? previousMessage.createdAt : undefined;
+        await conversation.save();
+      }
+
       emitMessagingEvent({
         type: 'message.deleted',
         conversationId: message.conversationId,
@@ -455,4 +465,3 @@ export class MessagingService {
     return message;
   }
 }
-

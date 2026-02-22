@@ -48,9 +48,9 @@ export function MessageThread({
       )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message: ChatMessage) => {
+        {messages.filter((msg: ChatMessage) => !msg.isDeleted).map((message: ChatMessage) => {
           const own = message.senderId === currentUserId;
-          const replyTo = message.replyToMessageId ? messages.find((item: ChatMessage) => item._id === message.replyToMessageId) : undefined;
+          const replyTo = message.replyToMessageId ? messages.find((item: ChatMessage) => item._id === message.replyToMessageId && !item.isDeleted) : undefined;
 
           return (
             <div key={message._id} className={cn('flex group', own ? 'justify-end' : 'justify-start')}>

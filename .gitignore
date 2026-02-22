@@ -20,3 +20,6 @@ _tmp_*
 apps/**/.env._*
 !apps/*/shared/dist/
 !apps/*/shared/dist/**
+
+.vercel
+.env*.local
