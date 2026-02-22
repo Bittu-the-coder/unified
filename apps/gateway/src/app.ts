@@ -22,47 +22,34 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'gateway' });
 });
 
+const buildProxy = (target: string, prefix: string) =>
+  createProxyMiddleware({
+    target,
+    changeOrigin: true,
+    pathRewrite: (path) => `${prefix}${path}`,
+  });
+
 app.use(
   '/auth',
-  createProxyMiddleware({
-    target: env.AUTH_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: (path) => `/auth${path}`,
-  }),
+  buildProxy(env.AUTH_SERVICE_URL, '/auth'),
 );
 
 app.use(
   '/users',
-  createProxyMiddleware({
-    target: env.USER_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: (path) => `/users${path}`,
-  }),
+  buildProxy(env.USER_SERVICE_URL, '/users'),
 );
 
 app.use(
   '/productivity',
-  createProxyMiddleware({
-    target: env.PRODUCTIVITY_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: (path) => `/productivity${path}`,
-  }),
+  buildProxy(env.PRODUCTIVITY_SERVICE_URL, '/productivity'),
 );
 
 app.use(
   '/messaging',
-  createProxyMiddleware({
-    target: env.MESSAGING_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: (path) => `/messaging${path}`,
-  }),
+  buildProxy(env.MESSAGING_SERVICE_URL, '/messaging'),
 );
 
 app.use(
   '/file-cloud',
-  createProxyMiddleware({
-    target: env.FILE_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: (path) => `/file-cloud${path}`,
-  }),
+  buildProxy(env.FILE_SERVICE_URL, '/file-cloud'),
 );

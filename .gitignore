@@ -10,3 +10,9 @@ plan_lines.txt
 
 .vercel
 .env*.local
+apps/auth-service/.env._authverify
+apps/auth-service/.env._authverify2
+apps/gateway/.env._prodcheck
+apps/gateway/.env._verify
+apps/web/.env._prodcheck
+apps/web/.env._webverify

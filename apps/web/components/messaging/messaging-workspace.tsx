@@ -37,7 +37,7 @@ const REALTIME_BASE =
   process.env.NEXT_PUBLIC_API_BASE?.trim() ||
   (process.env.NODE_ENV === 'development'
     ? 'http://localhost:3000'
-    : 'https://gateway-dun-chi.vercel.app');
+    : 'https://gateway-three-psi.vercel.app');
 
 export function MessagingWorkspace({ currentUserId, onError }: MessagingWorkspaceProps) {
   const [loading, setLoading] = useState(true);

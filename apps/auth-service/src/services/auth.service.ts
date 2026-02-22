@@ -123,8 +123,13 @@ export class AuthService {
       throw new UnauthorizedError('Account is not active');
     }
 
+    const userId = String((user as unknown as { _id?: unknown })._id ?? user.id ?? '');
+    if (!userId) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
     const payload = {
-      sub: user.id,
+      sub: userId,
       email: user.email,
       uniqueNumber: user.uniqueNumber,
       username: user.username,
@@ -133,34 +138,40 @@ export class AuthService {
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
 
-    await SessionModel.create({
-      userId: user.id,
-      accessToken,
-      refreshToken,
-      expiresAt: new Date(Date.now() + refreshTtlMs),
-      ipAddress: input.ipAddress,
-      userAgent: input.userAgent,
-      deviceInfo: {
-        id: input.deviceId,
-        name: input.deviceName,
-        type: input.deviceType,
-      },
-    });
-
-    if (input.deviceId) {
-      await UserDeviceModel.updateOne(
-        { userId: user.id, deviceId: input.deviceId },
-        {
-          $set: {
-            userId: user.id,
-            deviceId: input.deviceId,
-            deviceName: input.deviceName,
-            deviceType: input.deviceType,
-            lastActive: new Date(),
-          },
+    try {
+      await SessionModel.create({
+        userId,
+        accessToken,
+        refreshToken,
+        expiresAt: new Date(Date.now() + refreshTtlMs),
+        ipAddress: input.ipAddress,
+        userAgent: input.userAgent,
+        deviceInfo: {
+          id: input.deviceId,
+          name: input.deviceName,
+          type: input.deviceType,
         },
-        { upsert: true },
-      );
+      });
+
+      if (input.deviceId) {
+        await UserDeviceModel.updateOne(
+          { userId, deviceId: input.deviceId },
+          {
+            $set: {
+              userId,
+              deviceId: input.deviceId,
+              deviceName: input.deviceName,
+              deviceType: input.deviceType,
+              lastActive: new Date(),
+            },
+          },
+          { upsert: true },
+        );
+      }
+    } catch (error) {
+      // Do not block successful login if telemetry/session persistence fails.
+      // Tokens are already minted; the client can proceed.
+      console.error('[auth-service] login session persistence failed', error);
     }
 
     return {
