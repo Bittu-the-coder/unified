@@ -25,10 +25,10 @@ $GATEWAY_URL      = "https://gateway-dun-chi.vercel.app"
 $WEB_URL          = "https://web-c8yjx8in4-bittu-the-coders-projects.vercel.app"
 
 # ── Secrets ───────────────────────────────────────────────────────────────────
-$MONGO_BASE   = "mongodb+srv://bittuprajapati2271_db_user:2eHSHVYZhbJmY9br@bittuthecoder.brnuppi.mongodb.net"
-$MONGO_OPTS   = "?appName=bittuTheCoder"
-$JWT_ACCESS   = "unified_prod_access_s3cr3t_k3y_2026_x9z"
-$JWT_REFRESH  = "unified_prod_refresh_s3cr3t_k3y_2026_q7w"
+$MONGO_BASE   = ""
+$MONGO_OPTS   = ""
+$JWT_ACCESS   = ""
+$JWT_REFRESH  = ""
 
 # ── App list (deploy order matters: backends → gateway → web) ─────────────────
 $APPS = [ordered]@{
